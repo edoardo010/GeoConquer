@@ -39,5 +39,46 @@
     "createdAt": "2025-11-22T18:50:42.116Z",
     "updatedAt": "2025-11-22T18:50:42.116Z",
     "reason": "CHEAT RILEVATO: Velocità impossibile (163.4km/h > 60km/h) - Ban di 1 giorno applicato"
+  },
+  "539c2c9c-23d7-45b9-a422-33af1c288f53": {
+    "id": "539c2c9c-23d7-45b9-a422-33af1c288f53",
+    "userId": "8dd9744a-da74-45b4-8635-96da320aba6b",
+    "username": "player",
+    "startPoint": {
+      "latitude": 45.4831,
+      "longitude": 9.1747
+    },
+    "endPoint": {
+      "latitude": 45.5,
+      "longitude": 9.2
+    },
+    "distance": 2.724080126961388,
+    "duration": 45,
+    "calculatedSpeed": 3.6321068359485174,
+    "status": "pending",
+    "cheatDetected": false,
+    "createdAt": "2025-11-22T19:02:15.244Z",
+    "updatedAt": "2025-11-22T19:02:15.244Z"
+  },
+  "63fbbcbf-5907-4fe3-986b-81fe423a0d6b": {
+    "id": "63fbbcbf-5907-4fe3-986b-81fe423a0d6b",
+    "userId": "c8136bc1-b4b6-4f58-8c51-4bd37efac839",
+    "username": "player",
+    "startPoint": {
+      "latitude": 45.4831,
+      "longitude": 9.1747
+    },
+    "endPoint": {
+      "latitude": 45.5,
+      "longitude": 9.2
+    },
+    "distance": 2.724080126961388,
+    "duration": 1,
+    "calculatedSpeed": 163.44480761768327,
+    "status": "flagged_cheat",
+    "cheatDetected": true,
+    "createdAt": "2025-11-22T19:02:15.249Z",
+    "updatedAt": "2025-11-22T19:02:15.249Z",
+    "reason": "CHEAT RILEVATO: Velocità impossibile (163.4km/h > 60km/h) - Ban di 1 giorno applicato"
   }
 }

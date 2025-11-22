@@ -660,6 +660,199 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('App initialized');
 });
 
+// ===== TERRITORY CONQUEST FUNCTIONS =====
+
+let conquestMap = null;
+let conquestStartPoint = null;
+let conquestEndPoint = null;
+
+function showConquestMapModal() {
+  if (!appState.isLoggedIn()) {
+    showLoginModal();
+    return;
+  }
+
+  // Controlla ban
+  fetch(`${API_URL}/territory-conquests/my/ban-status`, {
+    headers: { 'user-id': appState.currentUser.id }
+  })
+    .then(r => r.json())
+    .then(data => {
+      if (data.banned) {
+        alert(`⛔ Sei bannato! Motivo: ${data.banInfo.reason}\nTempo rimanente: ${Math.ceil(data.timeRemaining / 3600)} ore`);
+        return;
+      }
+
+      const modal = document.getElementById('conquestMapModal');
+      if (modal) {
+        modal.classList.add('active');
+        conquestStartPoint = null;
+        conquestEndPoint = null;
+        document.getElementById('conquestDuration').value = '';
+        document.getElementById('conquestInfo').style.display = 'none';
+        
+        setTimeout(() => {
+          if (!conquestMap) {
+            conquestMap = L.map('conquestMap').setView([45.4642, 9.1900], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap contributors'
+            }).addTo(conquestMap);
+          }
+          conquestMap.invalidateSize();
+
+          conquestMap.off('click');
+          conquestMap.on('click', (e) => handleConquestMapClick(e));
+        }, 100);
+      }
+    })
+    .catch(err => console.error('Ban check error:', err));
+}
+
+function closeConquestMapModal() {
+  const modal = document.getElementById('conquestMapModal');
+  if (modal) modal.classList.remove('active');
+  if (conquestMap) {
+    conquestMap.off('click');
+  }
+  conquestStartPoint = null;
+  conquestEndPoint = null;
+}
+
+function handleConquestMapClick(e) {
+  if (!conquestStartPoint) {
+    conquestStartPoint = e.latlng;
+    L.circleMarker([e.latlng.lat, e.latlng.lng], {
+      radius: 8,
+      fillColor: '#667eea',
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8
+    }).addTo(conquestMap).bindPopup('📍 Punto di Partenza');
+    
+    alert('✅ Punto di partenza segnato! Clicca di nuovo per il punto di arrivo');
+  } else if (!conquestEndPoint) {
+    conquestEndPoint = e.latlng;
+    L.circleMarker([e.latlng.lat, e.latlng.lng], {
+      radius: 8,
+      fillColor: '#ef4444',
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.8
+    }).addTo(conquestMap).bindPopup('🏁 Punto di Arrivo');
+
+    // Disegna linea
+    L.polyline([
+      [conquestStartPoint.lat, conquestStartPoint.lng],
+      [conquestEndPoint.lat, conquestEndPoint.lng]
+    ], {
+      color: '#667eea',
+      weight: 2,
+      opacity: 0.7,
+      dashArray: '5, 5'
+    }).addTo(conquestMap);
+
+    conquestMap.off('click');
+    updateConquestInfo();
+  }
+}
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function updateConquestInfo() {
+  if (!conquestStartPoint || !conquestEndPoint) return;
+
+  const distance = calculateDistance(
+    conquestStartPoint.lat,
+    conquestStartPoint.lng,
+    conquestEndPoint.lat,
+    conquestEndPoint.lng
+  );
+
+  const duration = parseFloat(document.getElementById('conquestDuration').value) || 0;
+  const speed = duration > 0 ? (distance / (duration / 60)).toFixed(1) : 0;
+
+  document.getElementById('conquestDistance').textContent = distance.toFixed(2);
+  document.getElementById('conquestSpeed').textContent = speed;
+  document.getElementById('conquestInfo').style.display = 'block';
+
+  // Avvertenza velocità
+  const warning = document.getElementById('conquestWarning');
+  if (speed > 60) {
+    warning.style.display = 'block';
+    warning.innerHTML = `<span>⛔ Velocità impossibile! (${speed} km/h > 60 km/h) - Sarai bannato!</span>`;
+  } else if (speed > 0 && speed < 0.5) {
+    warning.style.display = 'block';
+    warning.innerHTML = `<span>⚠️ Velocità troppo bassa (${speed} km/h)</span>`;
+  } else {
+    warning.style.display = 'none';
+  }
+}
+
+function submitConquest() {
+  if (!conquestStartPoint || !conquestEndPoint) {
+    alert('Seleziona entrambi i punti sulla mappa');
+    return;
+  }
+
+  const duration = parseFloat(document.getElementById('conquestDuration').value);
+  if (!duration || duration < 1 || duration > 600) {
+    alert('Inserisci una durata valida (1-600 minuti)');
+    return;
+  }
+
+  document.getElementById('conquestLoader').classList.add('show');
+
+  fetch(`${API_URL}/territory-conquests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'user-id': appState.currentUser.id
+    },
+    body: JSON.stringify({
+      startLat: conquestStartPoint.lat,
+      startLon: conquestStartPoint.lng,
+      endLat: conquestEndPoint.lat,
+      endLon: conquestEndPoint.lng,
+      durationMinutes: duration
+    })
+  })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('conquestLoader').classList.remove('show');
+
+      if (data.banned) {
+        alert(`⛔ CHEAT RILEVATO!\n${data.error}\n\nSei bannato per 24 ore!`);
+        closeConquestMapModal();
+        return;
+      }
+
+      if (data.conquest) {
+        alert(`✅ Conquista inviata per approvazione!\n\n📍 Distanza: ${data.conquest.distance.toFixed(2)} km\n⚡ Velocità: ${data.conquest.calculatedSpeed.toFixed(1)} km/h`);
+        closeConquestMapModal();
+      } else if (data.error) {
+        alert(`❌ Errore: ${data.error}`);
+      }
+    })
+    .catch(err => {
+      document.getElementById('conquestLoader').classList.remove('show');
+      alert('Errore di connessione: ' + err.message);
+    });
+}
+
 // Make functions globally available
 window.showLoginModal = showLoginModal;
 window.closeLoginModal = closeLoginModal;
@@ -668,6 +861,9 @@ window.closeRegisterModal = closeRegisterModal;
 window.toggleToRegister = toggleToRegister;
 window.toggleToLogin = toggleToLogin;
 window.handleLogout = handleLogout;
+window.showConquestMapModal = showConquestMapModal;
+window.closeConquestMapModal = closeConquestMapModal;
+window.submitConquest = submitConquest;
 window.showClanModal = showClanModal;
 window.closeClanModal = closeClanModal;
 window.joinClan = joinClan;

@@ -22,5 +22,55 @@
     "loggedBy": "user",
     "createdAt": "2025-11-22T18:37:23.822Z",
     "updatedAt": "2025-11-22T18:37:23.822Z"
+  },
+  "9940dd7f-d358-4364-91e3-9937eaf679ca": {
+    "id": "9940dd7f-d358-4364-91e3-9937eaf679ca",
+    "userId": "8dd9744a-da74-45b4-8635-96da320aba6b",
+    "username": "user",
+    "type": "running",
+    "title": "Corsa mattutina Demo",
+    "description": "Attività demo registrata dal sistema",
+    "distance": 5.5,
+    "duration": 45,
+    "calories": 350,
+    "startTime": "2025-11-22T17:02:15.216Z",
+    "endTime": "2025-11-22T17:47:15.221Z",
+    "coordinates": [
+      {
+        "latitude": 45.4642,
+        "longitude": 9.19
+      }
+    ],
+    "avgSpeed": 7.3,
+    "maxSpeed": 9.5,
+    "elevation": 0,
+    "loggedBy": "user",
+    "createdAt": "2025-11-22T19:02:15.223Z",
+    "updatedAt": "2025-11-22T19:02:15.223Z"
+  },
+  "d4fe8e84-7ebb-4376-be05-6ab5619dcfca": {
+    "id": "d4fe8e84-7ebb-4376-be05-6ab5619dcfca",
+    "userId": "c8136bc1-b4b6-4f58-8c51-4bd37efac839",
+    "username": "user",
+    "type": "cycling",
+    "title": "Gita in bicicletta Demo",
+    "description": "Gita demo",
+    "distance": 15.3,
+    "duration": 60,
+    "calories": 600,
+    "startTime": "2025-11-22T16:02:15.226Z",
+    "endTime": "2025-11-22T17:02:15.226Z",
+    "coordinates": [
+      {
+        "latitude": 45.47,
+        "longitude": 9.2
+      }
+    ],
+    "avgSpeed": 15.3,
+    "maxSpeed": 25,
+    "elevation": 0,
+    "loggedBy": "user",
+    "createdAt": "2025-11-22T19:02:15.230Z",
+    "updatedAt": "2025-11-22T19:02:15.230Z"
   }
 }
