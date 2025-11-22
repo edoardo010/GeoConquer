@@ -17,6 +17,9 @@ Correndo o camminando, gli utenti possono espandere il proprio territorio virtua
 - **✅ Supporto Multi-Database**: PostgreSQL, MongoDB, Firebase, DynamoDB
 - **✅ Sistema di Clan**: Crea/unisciti a clan, leaderboard clan globale
 - **✅ Leaderboard Globale**: Classifica giocatori e clan
+- **✅ Sistema di Attività**: Logging attività fisiche per utenti e admin
+- **✅ Sistema di Conquiste**: Registrazione con approvazione admin
+- **✅ Admin Panel**: Dashboard completo con gestione attività e conquiste
 - **✅ UI Premium Dark Theme**: Design moderno con tema scuro e gradients
 - **✅ Design Responsive**: Mobile-first, works on all devices
 - **✅ State Management Centralizzato**: Gestione stato di app coerente
@@ -91,6 +94,7 @@ npm run demo
 - **[API.md](./API.md)** - Documentazione degli endpoint API
 - **[UI_GUIDE.md](./UI_GUIDE.md)** - Guida dell'interfaccia e design premium dark theme
 - **[CONQUEST_SYSTEM.md](./CONQUEST_SYSTEM.md)** - Sistema di conquiste territoriali con approvazione admin
+- **[ACTIVITY_SYSTEM.md](./ACTIVITY_SYSTEM.md)** - Sistema di logging attività fisiche (corse, camminate, ciclismo, trekking)
 - **[ADMIN_CREDENTIALS.md](./ADMIN_CREDENTIALS.md)** - Credenziali admin uniche per il pannello di controllo
 
 ---

@@ -365,6 +365,8 @@
             <button class="admin-nav-btn" onclick="switchAdminSection('approved')">✅ Approvate</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('rejected')">❌ Rifiutate</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('all')">📋 Tutte</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('activities')">🏃 Attività Utenti</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('logActivity')">📝 Registra Attività</button>
             <button class="admin-logout" onclick="handleAdminLogout()">Esci</button>
         </div>
 
@@ -431,6 +433,77 @@
                     <h2>📋 Tutte le Conquiste</h2>
                     <div id="allList"></div>
                 </div>
+
+                <!-- Activities Section -->
+                <div id="activitiesSection" class="admin-section" style="display: none;">
+                    <h2>🏃 Attività degli Utenti</h2>
+                    <div id="activitiesList"></div>
+                </div>
+
+                <!-- Log Activity Section -->
+                <div id="logActivitySection" class="admin-section" style="display: none;">
+                    <h2>📝 Registra Attività per Utente</h2>
+                    <div class="card">
+                        <form id="logActivityForm" onsubmit="handleLogActivityForUser(event)">
+                            <div class="form-group">
+                                <label for="logUserId">ID Utente</label>
+                                <input type="text" id="logUserId" placeholder="user-id" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="logUsername">Username</label>
+                                <input type="text" id="logUsername" placeholder="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="logActivityType">Tipo Attività</label>
+                                <select id="logActivityType" style="padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);" required>
+                                    <option value="">Seleziona tipo...</option>
+                                    <option value="running">🏃 Corsa</option>
+                                    <option value="walking">🚶 Camminata</option>
+                                    <option value="cycling">🚴 Ciclismo</option>
+                                    <option value="hiking">⛰️ Trekking</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="logTitle">Titolo Attività</label>
+                                <input type="text" id="logTitle" placeholder="es. Corsa mattutina al parco" required>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="form-group">
+                                    <label for="logDistance">Distanza (km)</label>
+                                    <input type="number" id="logDistance" step="0.1" min="0" placeholder="5.5" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="logDuration">Durata (minuti)</label>
+                                    <input type="number" id="logDuration" min="0" placeholder="45" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="logCalories">Calorie Bruciate</label>
+                                    <input type="number" id="logCalories" min="0" placeholder="300">
+                                </div>
+                                <div class="form-group">
+                                    <label for="logAvgSpeed">Velocità Media (km/h)</label>
+                                    <input type="number" id="logAvgSpeed" step="0.1" min="0" placeholder="7.5">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div class="form-group">
+                                    <label for="logStartTime">Data/Ora Inizio</label>
+                                    <input type="datetime-local" id="logStartTime" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="logEndTime">Data/Ora Fine</label>
+                                    <input type="datetime-local" id="logEndTime" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="logDescription">Descrizione (opzionale)</label>
+                                <textarea id="logDescription" placeholder="Note sull'attività..." style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); width: 100%; min-height: 80px;"></textarea>
+                            </div>
+                            <div class="loader" id="logActivityLoader"></div>
+                            <button type="submit" class="btn-primary">Registra Attività</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -468,6 +541,8 @@
                     loadConquests('rejected');
                 } else if (section === 'all') {
                     loadConquests('all');
+                } else if (section === 'activities') {
+                    loadActivities();
                 }
             }
         }
@@ -703,6 +778,152 @@
                 }
             } catch (error) {
                 alert('Errore di connessione: ' + error.message);
+            }
+        }
+
+        async function loadActivities() {
+            try {
+                const response = await fetch(`${API_URL}/activities/admin/all?limit=50`, {
+                    headers: {
+                        'admin-id': adminId
+                    }
+                });
+
+                const data = await response.json();
+                const activities = data.activities || [];
+
+                const container = document.getElementById('activitiesList');
+                if (!container) return;
+
+                if (activities.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🏃</div><p>Nessuna attività registrata</p></div>';
+                    return;
+                }
+
+                container.innerHTML = activities.map(activity => `
+                    <div class="conquest-item">
+                        <div class="conquest-header">
+                            <div>
+                                <div class="conquest-user">👤 ${activity.username}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em; margin-top: 5px;">
+                                    ${getActivityEmoji(activity.type)} ${activity.title}
+                                </div>
+                            </div>
+                            <span class="conquest-status" style="background: rgba(102, 126, 234, 0.2); color: #667eea; border: 1px solid #667eea;">
+                                ${activity.type.toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="conquest-details">
+                            <div class="detail-item">
+                                <div class="detail-label">📏 Distanza</div>
+                                <div class="detail-value">${activity.distance.toFixed(1)} km</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">⏱️ Durata</div>
+                                <div class="detail-value">${activity.duration} min</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">🔥 Calorie</div>
+                                <div class="detail-value">${activity.calories} kcal</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">⚡ Velocità Media</div>
+                                <div class="detail-value">${activity.avgSpeed.toFixed(1)} km/h</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">📅 Data</div>
+                                <div class="detail-value">${new Date(activity.startTime).toLocaleDateString('it-IT')}</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">👤 Loggato da</div>
+                                <div class="detail-value">${activity.loggedBy === 'admin' ? '👨‍💼 Admin' : '👤 Utente'}</div>
+                            </div>
+                        </div>
+                        ${activity.description ? `<div class="detail-item" style="margin-bottom: 0;"><div class="detail-label">📝 Note</div><div class="detail-value">${activity.description}</div></div>` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Errore caricamento attività:', error);
+            }
+        }
+
+        function getActivityEmoji(type) {
+            const emojis = {
+                'running': '🏃',
+                'walking': '🚶',
+                'cycling': '🚴',
+                'hiking': '⛰️'
+            };
+            return emojis[type] || '🏃';
+        }
+
+        async function handleLogActivityForUser(e) {
+            e.preventDefault();
+
+            const userId = document.getElementById('logUserId').value.trim();
+            const username = document.getElementById('logUsername').value.trim();
+            const type = document.getElementById('logActivityType').value;
+            const title = document.getElementById('logTitle').value.trim();
+            const distance = parseFloat(document.getElementById('logDistance').value);
+            const duration = parseInt(document.getElementById('logDuration').value);
+            const calories = parseInt(document.getElementById('logCalories').value) || 0;
+            const avgSpeed = parseFloat(document.getElementById('logAvgSpeed').value) || 0;
+            const startTime = new Date(document.getElementById('logStartTime').value);
+            const endTime = new Date(document.getElementById('logEndTime').value);
+            const description = document.getElementById('logDescription').value.trim();
+
+            if (!userId || !username || !type || !title || !distance || !duration) {
+                alert('Compila tutti i campi obbligatori');
+                return;
+            }
+
+            if (startTime >= endTime) {
+                alert('L\'ora di inizio deve essere prima dell\'ora di fine');
+                return;
+            }
+
+            document.getElementById('logActivityLoader').classList.add('show');
+            const submitBtn = document.querySelector('#logActivityForm button[type="submit"]');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/activities/admin/log-for-user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'admin-id': adminId
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        username,
+                        type,
+                        title,
+                        distance,
+                        duration,
+                        calories,
+                        avgSpeed,
+                        startTime,
+                        endTime,
+                        coordinates: [{ latitude: 45.5, longitude: 9.2 }],
+                        maxSpeed: avgSpeed * 1.2,
+                        description
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('✅ Attività registrata per l\'utente!');
+                    document.getElementById('logActivityForm').reset();
+                    loadActivities();
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            } catch (error) {
+                alert('Errore di connessione: ' + error.message);
+            } finally {
+                document.getElementById('logActivityLoader').classList.remove('show');
+                submitBtn.disabled = false;
             }
         }
 
