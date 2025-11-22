@@ -12,15 +12,21 @@ Correndo o camminando, gli utenti possono espandere il proprio territorio virtua
 - **✅ Sfide tra amici**: competi per il controllo di quartieri, parchi o città
 - **✅ Gamification completa**: badge, livelli e ricompense per mantenere alta la motivazione
 - **✅ Salute e benessere**: integra il movimento con obiettivi fitness
-- **✅ Sistema di Autenticazione**: Registrazione e Login utenti con validazione
+- **✅ Sistema di Autenticazione**: Registrazione e Login utenti con validazione JWT
 - **✅ Database Setup Wizard**: Configurazione guidata per amministratori
 - **✅ Supporto Multi-Database**: PostgreSQL, MongoDB, Firebase, DynamoDB
+- **✅ Sistema di Clan**: Crea/unisciti a clan, leaderboard clan globale
+- **✅ Leaderboard Globale**: Classifica giocatori e clan
+- **✅ UI Premium Dark Theme**: Design moderno con tema scuro e gradients
+- **✅ Design Responsive**: Mobile-first, works on all devices
+- **✅ State Management Centralizzato**: Gestione stato di app coerente
+- **✅ Error Handling Robusto**: Validazione e messaggi di errore inline
 
 ---
 
 ## 🚀 Quick Start
 
-### Installazione e Setup Amministratore
+### 1. Installazione
 
 ```bash
 # Clona il repository
@@ -29,51 +35,61 @@ cd GeoConquer
 
 # Installa le dipendenze
 npm install
-
-# Esegui il Database Setup Wizard per amministratori
-npm run setup:db
-
-# Segui i passaggi interattivi per configurare:
-# - Account amministratore
-# - Tipo di database (PostgreSQL, MongoDB, Firebase, ecc.)
-# - Credenziali database
-# - Porta server
 ```
 
-### Avvio del Server
+### 2. Setup Database (Opzionale per Sviluppo)
+
+Per usare un database reale (PostgreSQL, MongoDB, Firebase, ecc.):
 
 ```bash
-# Avvia il server in modalità sviluppo
-npm run dev
+# Esegui il Database Setup Wizard
+npm run setup:db
 
-# Visita http://localhost:3000
-# Prova: Registrati o Accedi dalla pagina principale!
+# Segui i passaggi interattivi:
+# 1. Configura account amministratore
+# 2. Scegli tipo di database
+# 3. Inserisci credenziali
+# 4. Configura porta server
 ```
+
+### 3. Avvia il Server
+
+**Modalità Sviluppo** (con hot reload):
+```bash
+npm run dev
+# Server: http://localhost:3000
+```
+
+**Modalità Produzione**:
+```bash
+npm run build
+npm start
+```
+
+### 4. Accedi all'Interfaccia
+
+Apri il browser e vai a: **http://localhost:3000**
+
+- 👤 **Registrati**: Crea un nuovo account
+- 🔓 **Accedi**: Accedi con le tue credenziali
+- 🗺️ **Esplora la Mappa**: Visualizza i territori conquistati
+- 🏆 **Classifica**: Consulta la leaderboard globale
+- ⚔️ **Clan**: Crea o unisciti a un clan
 
 ### Demo Rapida
 
 ```bash
-# Esegui la demo per vedere il sistema in azione
 npm run demo
-```
-
-### Build per Produzione
-
-```bash
-# Compila il progetto
-npm run build
-
-# Avvia il server
-npm start
 ```
 
 ---
 
-## 📖 Documentazione Setup
+## 📖 Documentazione
 
 - **[ADMIN_SETUP.md](./ADMIN_SETUP.md)** - Guida completa per amministratori (Database Setup, Sicurezza, Troubleshooting)
 - **[DATABASE_OPTIONS.md](./DATABASE_OPTIONS.md)** - Opzioni professionali per database (PostgreSQL, MongoDB, Firebase, DynamoDB)
 - **[API.md](./API.md)** - Documentazione degli endpoint API
+- **[UI_GUIDE.md](./UI_GUIDE.md)** - Guida dell'interfaccia e design premium dark theme
 
 ---
 
