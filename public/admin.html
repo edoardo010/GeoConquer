@@ -367,6 +367,7 @@
             <button class="admin-nav-btn" onclick="switchAdminSection('all')">📋 Tutte</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('territories')">🗺️ Territori</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('bans')">🚫 Ban</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('database')">💾 Database</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('activities')">🏃 Attività</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('logActivity')">📝 Log Attività</button>
             <button class="admin-logout" onclick="handleAdminLogout()">Esci</button>
@@ -451,6 +452,12 @@
                 <div id="bansSection" class="admin-section" style="display: none;">
                     <h2>🚫 Ban Attivi</h2>
                     <div id="bansList"></div>
+                </div>
+
+                <!-- Database Section -->
+                <div id="databaseSection" class="admin-section" style="display: none;">
+                    <h2>💾 Database Admin</h2>
+                    <div id="databaseInfo"></div>
                 </div>
 
                 <!-- Activities Section -->
@@ -564,6 +571,8 @@
                     loadTerritories('pending');
                 } else if (section === 'bans') {
                     loadBans();
+                } else if (section === 'database') {
+                    loadDatabaseInfo();
                 } else if (section === 'activities') {
                     loadActivities();
                 }
@@ -1160,6 +1169,139 @@
                     loadBans();
                 } else {
                     alert('Errore rimozione ban');
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function loadDatabaseInfo() {
+            try {
+                const response = await fetch(`${API_URL}/admin/database/info`, {
+                    headers: { 'admin-id': adminId }
+                });
+
+                const data = await response.json();
+                const container = document.getElementById('databaseInfo');
+                
+                if (!container) return;
+
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 style="margin: 0;">📊 Informazioni Database</h3>
+                        </div>
+                        <div style="background: var(--bg-darker); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <p style="color: var(--text-muted); margin: 0 0 5px 0;">💾 Tipo</p>
+                                    <p style="color: var(--text-primary); font-weight: 600; margin: 0;">${data.type}</p>
+                                </div>
+                                <div>
+                                    <p style="color: var(--text-muted); margin: 0 0 5px 0;">📁 Percorso</p>
+                                    <p style="color: var(--text-primary); font-weight: 600; margin: 0; font-size: 0.85em; word-break: break-all;">${data.location}</p>
+                                </div>
+                                <div>
+                                    <p style="color: var(--text-muted); margin: 0 0 5px 0;">💾 Spazio Totale</p>
+                                    <p style="color: var(--text-primary); font-weight: 600; margin: 0;">${data.storage.totalSize}</p>
+                                </div>
+                                <div>
+                                    <p style="color: var(--text-muted); margin: 0 0 5px 0;">🔄 Backup Disponibili</p>
+                                    <p style="color: var(--text-primary); font-weight: 600; margin: 0;">${data.storage.backupCount}</p>
+                                </div>
+                            </div>
+                            <div style="margin-top: 15px; padding: 15px; background: var(--bg-card); border-radius: 6px; border-left: 3px solid #10b981;">
+                                <p style="margin: 0; color: #10b981; font-weight: 600;">✅ ${data.status}</p>
+                            </div>
+                        </div>
+
+                        <h4 style="margin-top: 30px;">📦 Collezioni</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; border-left: 3px solid #667eea;">
+                                <p style="color: var(--text-muted); margin: 0 0 5px 0;">👥 Utenti</p>
+                                <p style="color: var(--text-primary); font-weight: 600; margin: 0; font-size: 1.5em;">${data.collections.users.count}</p>
+                            </div>
+                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; border-left: 3px solid #f39c12;">
+                                <p style="color: var(--text-muted); margin: 0 0 5px 0;">🏃 Attività</p>
+                                <p style="color: var(--text-primary); font-weight: 600; margin: 0; font-size: 1.5em;">${data.collections.activities.count}</p>
+                            </div>
+                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; border-left: 3px solid #10b981;">
+                                <p style="color: var(--text-muted); margin: 0 0 5px 0;">🗺️ Conquiste</p>
+                                <p style="color: var(--text-primary); font-weight: 600; margin: 0; font-size: 1.5em;">${data.collections.conquests.count}</p>
+                            </div>
+                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px; border-left: 3px solid #ef4444;">
+                                <p style="color: var(--text-muted); margin: 0 0 5px 0;">⚔️ Clan</p>
+                                <p style="color: var(--text-primary); font-weight: 600; margin: 0; font-size: 1.5em;">${data.collections.clans.count}</p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 30px;">
+                            <button class="action-btn action-approve" onclick="createDatabaseBackup()" style="flex: 1;">💾 Crea Backup</button>
+                            <button class="action-btn action-reject" onclick="viewBackupList()" style="flex: 1;">📋 Visualizza Backup</button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Errore caricamento database info:', error);
+            }
+        }
+
+        async function createDatabaseBackup() {
+            if (!confirm('Sei sicuro di voler creare un backup? Questo salverà tutti i dati in una cartella separata.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/database/backup`, {
+                    method: 'POST',
+                    headers: { 'admin-id': adminId }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ Backup creato!\n\nTimestamp: ${data.timestamp}`);
+                    loadDatabaseInfo();
+                } else {
+                    alert('Errore: ' + data.error);
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function viewBackupList() {
+            try {
+                const response = await fetch(`${API_URL}/admin/database/backups`, {
+                    headers: { 'admin-id': adminId }
+                });
+
+                const data = await response.json();
+                const backups = data.backups || [];
+
+                let html = '<h4>📋 Backup Disponibili</h4>';
+                
+                if (backups.length === 0) {
+                    html += '<p style="color: var(--text-muted);">Nessun backup trovato</p>';
+                } else {
+                    html += '<div style="max-height: 400px; overflow-y: auto;">';
+                    backups.forEach(backup => {
+                        const date = new Date(backup.created).toLocaleString('it-IT');
+                        const size = (backup.size / 1024).toFixed(2) + ' KB';
+                        html += `
+                            <div style="background: var(--bg-card); padding: 12px; margin-bottom: 10px; border-radius: 6px; border-left: 3px solid #667eea;">
+                                <p style="margin: 0; font-weight: 600; color: var(--text-primary);">${backup.filename}</p>
+                                <p style="margin: 5px 0 0 0; font-size: 0.85em; color: var(--text-muted);">📅 ${date} | 💾 ${size}</p>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                const container = document.getElementById('databaseInfo');
+                const existingBackupDiv = container.querySelector('h4');
+                if (existingBackupDiv) {
+                    existingBackupDiv.parentElement.innerHTML = html;
                 }
             } catch (error) {
                 alert('Errore: ' + error.message);
