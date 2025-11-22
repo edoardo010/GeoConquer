@@ -250,6 +250,21 @@ async function handleRegister(e) {
 
   clearErrorMessages('register');
 
+  // Validate password strength
+  const passwordChecks = [
+    { pattern: /.{8,}/, name: 'almeno 8 caratteri' },
+    { pattern: /[A-Z]/, name: 'almeno una maiuscola' },
+    { pattern: /[a-z]/, name: 'almeno una minuscola' },
+    { pattern: /[0-9]/, name: 'almeno un numero' },
+    { pattern: /[!@#$%^&*]/, name: 'almeno un carattere speciale' }
+  ];
+
+  const failedChecks = passwordChecks.filter(check => !check.pattern.test(password));
+  if (failedChecks.length > 0) {
+    showError('register', 'password', 'Password: ' + failedChecks.map(c => c.name).join(', '));
+    return;
+  }
+
   if (password !== confirmPassword) {
     showError('register', 'confirmPassword', 'Le password non coincidono');
     return;
@@ -317,7 +332,12 @@ async function loadPasswordRequirements() {
     const requirementsDiv = document.getElementById('passwordRequirements');
     if (!requirementsDiv) return;
     
-    requirementsDiv.innerHTML = '<strong style="color: var(--text-primary);">Requisiti Password:</strong><div style="margin-top: 10px;">';
+    requirementsDiv.innerHTML = '';
+
+    const title = document.createElement('strong');
+    title.style.color = 'var(--text-primary)';
+    title.textContent = 'Requisiti Password:';
+    requirementsDiv.appendChild(title);
 
     const passwordInput = document.getElementById('registerPassword');
     const requirements = data.password_requirements || [];
@@ -326,11 +346,10 @@ async function loadPasswordRequirements() {
       const div = document.createElement('div');
       div.className = 'requirement';
       div.style.color = 'var(--text-muted)';
+      div.style.marginTop = '8px';
       div.innerHTML = `<span class="requirement-icon" style="display:inline-block;margin-right:8px;">○</span> ${req}`;
       requirementsDiv.appendChild(div);
     });
-
-    requirementsDiv.innerHTML += '</div>';
 
     if (passwordInput) {
       passwordInput.addEventListener('input', () => {
@@ -345,27 +364,27 @@ async function loadPasswordRequirements() {
 
 function updatePasswordRequirements(password, requirements) {
   const checks = [
-    { pattern: /.{8,}/ },
-    { pattern: /[A-Z]/ },
-    { pattern: /[a-z]/ },
-    { pattern: /[0-9]/ },
-    { pattern: /[!@#$%^&*]/ }
+    { pattern: /.{8,}/, name: '8+ characters' },
+    { pattern: /[A-Z]/, name: 'uppercase' },
+    { pattern: /[a-z]/, name: 'lowercase' },
+    { pattern: /[0-9]/, name: 'number' },
+    { pattern: /[!@#$%^&*]/, name: 'special char' }
   ];
 
-  const elements = document.querySelectorAll('#passwordRequirements .requirement');
-  elements.forEach((el, i) => {
-    if (i > 0) {
-      if (checks[i - 1].pattern.test(password)) {
-        el.style.color = 'var(--success-color)';
-        el.classList.add('met');
-        const icon = el.querySelector('.requirement-icon');
-        if (icon) icon.textContent = '✓';
-      } else {
-        el.style.color = 'var(--text-muted)';
-        el.classList.remove('met');
-        const icon = el.querySelector('.requirement-icon');
-        if (icon) icon.textContent = '○';
-      }
+  const requirementElements = document.querySelectorAll('#passwordRequirements .requirement');
+  
+  requirementElements.forEach((el, i) => {
+    const check = checks[i];
+    if (check && check.pattern.test(password)) {
+      el.style.color = 'var(--success-color)';
+      el.classList.add('met');
+      const icon = el.querySelector('.requirement-icon');
+      if (icon) icon.textContent = '✓';
+    } else if (check) {
+      el.style.color = 'var(--text-muted)';
+      el.classList.remove('met');
+      const icon = el.querySelector('.requirement-icon');
+      if (icon) icon.textContent = '○';
     }
   });
 }
