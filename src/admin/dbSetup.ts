@@ -50,17 +50,18 @@ export class DatabaseSetupManager {
       process.stdout.write(query);
 
       let password = '';
-      stdin.on('data', function onData(char) {
-        if (char === '\n' || char === '\r' || char === '\u0004') {
+      stdin.on('data', function onData(char: any) {
+        const charStr = char.toString();
+        if (charStr === '\n' || charStr === '\r' || charStr === '\u0004') {
           stdin.setRawMode(false);
           stdin.pause();
           stdin.removeListener('data', onData);
           process.stdout.write('\n');
           resolve(password);
-        } else if (char === '\u0003') {
+        } else if (charStr === '\u0003') {
           process.exit();
         } else {
-          password += char;
+          password += charStr;
         }
       });
     });

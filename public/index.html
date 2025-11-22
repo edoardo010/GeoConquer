@@ -241,5 +241,205 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/app.js"></script>
+    <script>
+        // ===== MAP & DATA LOADING =====
+        let map = null;
+
+        function initializeMap() {
+            const mapEl = document.getElementById('map');
+            if (!mapEl) return;
+            
+            map = L.map('map').setView([45.4642, 9.1900], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        async function loadTerritories() {
+            if (!map) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/territories`);
+                const territories = await response.json();
+
+                territories.forEach(territory => {
+                    const coords = territory.coordinates.map(c => [c.latitude, c.longitude]);
+                    const isOwner = appState.isLoggedIn() && territory.userId === appState.currentUser.id;
+                    const color = isOwner ? '#667eea' : '#ef4444';
+
+                    L.polygon(coords, {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.3,
+                        weight: 2
+                    }).addTo(map).bindPopup(`
+                        <b>Territorio</b><br>
+                        Area: ${Math.round(territory.area)} m²<br>
+                        Conquistato: ${new Date(territory.conqueredAt).toLocaleDateString('it-IT')}
+                    `);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento dei territori:', error);
+            }
+        }
+
+        async function loadUserStats() {
+            if (!appState.isLoggedIn()) return;
+
+            try {
+                const response = await fetch(`${API_URL}/users/${appState.currentUser.id}/stats`);
+                const data = await response.json();
+
+                const els = {
+                    userTerritories: document.getElementById('userTerritories'),
+                    userDistance: document.getElementById('userDistance'),
+                    userLevel: document.getElementById('userLevel'),
+                    userArea: document.getElementById('userArea')
+                };
+
+                if (els.userTerritories) els.userTerritories.textContent = data.stats.territoriesCount;
+                if (els.userDistance) els.userDistance.textContent = (data.stats.totalDistance / 1000).toFixed(1);
+                if (els.userLevel) els.userLevel.textContent = data.stats.level;
+                if (els.userArea) els.userArea.textContent = Math.round(data.stats.totalArea);
+            } catch (error) {
+                console.error('Errore nel caricamento delle statistiche:', error);
+            }
+        }
+
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/users/leaderboard`);
+                const leaderboard = await response.json();
+
+                const container = document.getElementById('usersLeaderboard');
+                if (!container) return;
+                
+                container.innerHTML = '';
+
+                leaderboard.slice(0, 10).forEach((entry) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">#${entry.rank}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${entry.username}</div>
+                            <div class="leaderboard-details">Livello ${entry.level} • ${entry.totalDistance.toFixed(1)} km</div>
+                        </div>
+                        <div class="leaderboard-score">${entry.totalArea.toFixed(0)} m²</div>
+                    `;
+                    container.appendChild(item);
+                });
+
+                const modalContainer = document.getElementById('modalPlayersLeaderboard');
+                if (modalContainer) {
+                    modalContainer.innerHTML = container.innerHTML;
+                }
+            } catch (error) {
+                console.error('Errore nel caricamento della classifica:', error);
+            }
+        }
+
+        async function loadClansLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/clans/leaderboard`);
+                const leaderboard = await response.json();
+
+                const container = document.getElementById('clansLeaderboard');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                container.dataset.loaded = 'true';
+
+                leaderboard.slice(0, 10).forEach((clan) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">#${clan.rank}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${clan.name}</div>
+                            <div class="leaderboard-details">Livello ${clan.level} • ${clan.membersCount} membri</div>
+                        </div>
+                        <div class="leaderboard-score">${clan.totalArea.toFixed(0)} m²</div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento della classifica clan:', error);
+            }
+        }
+
+        async function loadModalClansLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/clans/leaderboard`);
+                const leaderboard = await response.json();
+
+                const container = document.getElementById('modalClansLeaderboard');
+                if (!container) return;
+                
+                container.innerHTML = '';
+                container.dataset.loaded = 'true';
+
+                leaderboard.slice(0, 10).forEach((clan) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">#${clan.rank}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${clan.name}</div>
+                            <div class="leaderboard-details">Livello ${clan.level} • ${clan.membersCount} membri</div>
+                        </div>
+                        <div class="leaderboard-score">${clan.totalArea.toFixed(0)} m²</div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento della classifica clan modale:', error);
+            }
+        }
+
+        async function loadAllClans() {
+            try {
+                const response = await fetch(`${API_URL}/clans`);
+                const clans = await response.json();
+
+                const container = document.getElementById('clansList');
+                if (!container) return;
+                
+                container.innerHTML = '';
+
+                if (clans.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Nessun clan disponibile</p>';
+                    return;
+                }
+
+                clans.slice(0, 5).forEach(clan => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.style.justifyContent = 'space-between';
+                    const desc = clan.clan.description.substring(0, 40) + (clan.clan.description.length > 40 ? '...' : '');
+                    item.innerHTML = `
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${clan.clan.name}</div>
+                            <div class="leaderboard-details">${desc}</div>
+                        </div>
+                        <button class="btn-secondary btn-small" onclick="joinClan('${clan.clan.id}')">Entra</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento dei clan:', error);
+            }
+        }
+
+        // Initialize everything
+        window.addEventListener('load', () => {
+            console.log('Page loaded, initializing...');
+            initializeMap();
+            loadTerritories();
+            loadLeaderboard();
+            loadAllClans();
+            checkAuthStatus();
+        });
+    </script>
 </body>
 </html>
