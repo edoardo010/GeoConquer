@@ -1,6 +1,12 @@
-const API_URL = 'http://localhost:3000/api';
-let currentUser = null;
-let authToken = null;
+if (typeof API_URL === 'undefined') {
+  var API_URL = 'http://localhost:3000/api';
+}
+if (typeof currentUser === 'undefined') {
+  var currentUser = null;
+}
+if (typeof authToken === 'undefined') {
+  var authToken = null;
+}
 
 function showLoginModal() {
     document.getElementById('loginModal').classList.add('active');
@@ -264,16 +270,21 @@ function updateAuthHeader() {
     const authButtons = authHeader.querySelector('.auth-buttons');
 
     if (currentUser) {
+        const initials = currentUser.username.substring(0, 2).toUpperCase();
         authButtons.innerHTML = `
             <div class="user-info">
-                <span class="user-welcome">Benvenuto, ${currentUser.username}!</span>
-                <button onclick="handleLogout()" class="btn-secondary">Esci</button>
+                <div class="user-avatar">${initials}</div>
+                <div class="user-welcome">
+                    <div class="user-welcome-name">${currentUser.username}</div>
+                    <div class="user-welcome-level">Livello ${currentUser.level || 1}</div>
+                </div>
+                <button onclick="handleLogout()" class="btn-secondary btn-small">Esci</button>
             </div>
         `;
     } else {
         authButtons.innerHTML = `
-            <button onclick="showLoginModal()">Accedi</button>
-            <button onclick="showRegisterModal()">Registrati</button>
+            <button class="btn-secondary btn-small" onclick="showLoginModal()">🔓 Accedi</button>
+            <button class="btn-primary btn-small" onclick="showRegisterModal()">✨ Registrati</button>
         `;
     }
 }

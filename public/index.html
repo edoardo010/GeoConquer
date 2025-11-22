@@ -3,520 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoConquer - Mappa Territoriale</title>
+    <title>GeoConquer - Conquista Territoriale Premium</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="/styles.css" />
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-        
-        h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .subtitle {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .map-container {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            height: 600px;
-        }
-        
-        #map {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-            color: white;
-        }
-        
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-        
-        .badge-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .badge {
-            padding: 8px 15px;
-            background: #f0f0f0;
-            border-radius: 20px;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .challenge-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .challenge-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .challenge-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
-            font-weight: bold;
-            margin-top: 8px;
-        }
-        
-        .status-pending {
-            background: #ffeaa7;
-            color: #d63031;
-        }
-        
-        .status-accepted {
-            background: #74b9ff;
-            color: #0984e3;
-        }
-        
-        .status-completed {
-            background: #55efc4;
-            color: #00b894;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: transform 0.2s;
-            width: 100%;
-            margin-top: 10px;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .legend {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9em;
-        }
-        
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
-        }
-        
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 90%;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .modal h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group.error input {
-            border-color: #e74c3c;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.85em;
-            margin-top: 5px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        .requirements {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 0.9em;
-        }
-
-        .requirement {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            color: #666;
-        }
-
-        .requirement.met {
-            color: #27ae60;
-        }
-
-        .requirement-icon {
-            margin-right: 8px;
-            font-weight: bold;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-        }
-
-        .modal-footer button {
-            flex: 1;
-            padding: 12px;
-            margin: 0;
-        }
-
-        .btn-secondary {
-            background: #e0e0e0 !important;
-            color: #333 !important;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0 !important;
-        }
-
-        .toggle-form {
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
-        }
-
-        .toggle-form a {
-            color: #667eea;
-            cursor: pointer;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .toggle-form a:hover {
-            text-decoration: underline;
-        }
-
-        .auth-header {
-            text-align: right;
-            padding: 15px 20px;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .auth-buttons button {
-            padding: 8px 20px;
-            font-size: 0.95em;
-            width: auto;
-            margin: 0;
-        }
-
-        .user-info {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .user-welcome {
-            color: #667eea;
-            font-weight: 500;
-        }
-
-        .close-modal {
-            float: right;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #999;
-            transition: color 0.2s;
-        }
-
-        .close-modal:hover {
-            color: #333;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #c3e6cb;
-            display: none;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        .loader {
-            display: none;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        .loader.show {
-            display: block;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        button:disabled:hover {
-            transform: none;
-        }
-    </style>
 </head>
 <body>
-    <div class="auth-header" id="authHeader">
-        <div></div>
-        <div class="auth-buttons">
-            <button class="btn-login" onclick="showLoginModal()">Accedi</button>
-            <button class="btn-register" onclick="showRegisterModal()">Registrati</button>
+    <!-- Auth Header -->
+    <header class="auth-header" id="authHeader">
+        <div class="header-logo">
+            🌍 <span>GeoConquer</span>
         </div>
-    </div>
+        <nav class="auth-buttons" id="navButtons">
+            <button class="btn-secondary btn-small" onclick="showLoginModal()">🔓 Accedi</button>
+            <button class="btn-primary btn-small" onclick="showRegisterModal()">✨ Registrati</button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
     <div class="container">
-        <header>
-            <h1>🌍 GeoConquer</h1>
-            <p class="subtitle">Mappe Interattive & Sistema di Sfide</p>
-        </header>
-        
-        <div class="main-content">
-            <div class="map-container">
-                <div id="map"></div>
-            </div>
-            
-            <div class="sidebar">
-                <div class="card">
-                    <h2>📊 Statistiche</h2>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-value" id="territories">0</span>
-                            <span class="stat-label">Territori</span>
+        <!-- Section: Map & Overview -->
+        <section class="full-width">
+            <div class="grid-container">
+                <div class="map-container" id="mapContainer">
+                    <div id="map"></div>
+                </div>
+                <div class="sidebar">
+                    <!-- User Stats Card -->
+                    <div class="card" id="userStatsCard" style="display: none;">
+                        <div class="card-header">
+                            <h3 style="margin: 0;">📊 I Tuoi Dati</h3>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="area">0</span>
-                            <span class="stat-label">Area (m²)</span>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <span class="stat-value" id="userTerritories">0</span>
+                                <span class="stat-label">Territori</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="userDistance">0</span>
+                                <span class="stat-label">km</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="userLevel">1</span>
+                                <span class="stat-label">Livello</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" id="userArea">0</span>
+                                <span class="stat-label">m²</span>
+                            </div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="distance">0</span>
-                            <span class="stat-label">Distanza (km)</span>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="card" id="quickActionsCard" style="display: none;">
+                        <div class="card-header">
+                            <h3 style="margin: 0;">⚡ Azioni Rapide</h3>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-value" id="level">1</span>
-                            <span class="stat-label">Livello</span>
+                        <button class="btn-primary btn-small" onclick="showClanModal()" style="width: 100%; margin-top: 0;">+ Crea Clan</button>
+                        <button class="btn-secondary btn-small" onclick="showLeaderboardModal()" style="width: 100%; margin-top: 10px;">🏆 Classifica</button>
+                    </div>
+
+                    <!-- Badges Card -->
+                    <div class="card" id="badgesCard" style="display: none;">
+                        <div class="card-header">
+                            <h3 style="margin: 0;">🏆 Badge</h3>
+                        </div>
+                        <div class="badge-container" id="badgesList">
+                            <p style="color: var(--text-muted);">Nessun badge ancora</p>
                         </div>
                     </div>
                 </div>
-                
+            </div>
+        </section>
+
+        <!-- Section: Leaderboard & Clans -->
+        <section class="full-width" style="margin-top: 40px;">
+            <div class="grid-container">
+                <!-- Global Leaderboard -->
                 <div class="card">
-                    <h2>🏆 Badge Ottenuti</h2>
-                    <div class="badge-container" id="badges">
-                        <div class="badge">Nessun badge ancora</div>
+                    <div class="card-header">
+                        <h3 style="margin: 0;">🏆 Classifica Globale</h3>
+                        <div class="card-header-right">
+                            <button class="tab active" onclick="switchLeaderboard('users')">Giocatori</button>
+                            <button class="tab" onclick="switchLeaderboard('clans')">Clan</button>
+                        </div>
+                    </div>
+                    <div id="leaderboardContainer">
+                        <div id="usersLeaderboard"></div>
+                        <div id="clansLeaderboard" style="display: none;"></div>
                     </div>
                 </div>
-                
+
+                <!-- Your Clan Card -->
+                <div class="card" id="clanCard" style="display: none;">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">⚔️ Il Tuo Clan</h3>
+                    </div>
+                    <div id="clanDetails"></div>
+                </div>
+
+                <!-- Browse Clans Card -->
                 <div class="card">
-                    <h2>⚔️ Sfide Attive</h2>
-                    <div class="challenge-list" id="challenges">
-                        <p style="text-align: center; color: #999;">Nessuna sfida in corso</p>
+                    <div class="card-header">
+                        <h3 style="margin: 0;">🏰 Scopri Clan</h3>
+                    </div>
+                    <div id="clansList" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Legend -->
+        <section class="full-width" style="margin-top: 40px;">
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin: 0;">🗺️ Legenda della Mappa</h3>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div class="flex gap-2 items-center">
+                        <div style="width: 25px; height: 25px; background: rgba(102, 126, 234, 0.5); border: 2px solid #667eea; border-radius: 4px;"></div>
+                        <span>I tuoi territori</span>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <div style="width: 25px; height: 25px; background: rgba(239, 68, 68, 0.5); border: 2px solid #ef4444; border-radius: 4px;"></div>
+                        <span>Territori di altri</span>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <div style="width: 25px; height: 25px; background: rgba(16, 185, 129, 0.5); border: 2px solid #10b981; border-radius: 4px;"></div>
+                        <span>Sfide attive</span>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="card">
-            <h2>🗺️ Legenda Mappa</h2>
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: rgba(102, 126, 234, 0.5); border: 2px solid #667eea;"></div>
-                    <span>I tuoi territori</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: rgba(231, 76, 60, 0.5); border: 2px solid #e74c3c;"></div>
-                    <span>Territori di altri utenti</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: rgba(46, 204, 113, 0.5); border: 2px solid #2ecc71;"></div>
-                    <span>Territori contesi (sfide)</span>
-                </div>
-            </div>
-        </div>
+        </section>
     </div>
+
+    <!-- ===== MODALS ===== -->
 
     <!-- Login Modal -->
     <div id="loginModal" class="modal">
@@ -527,12 +146,12 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginUsername">Username</label>
-                    <input type="text" id="loginUsername" name="username" required>
+                    <input type="text" id="loginUsername" name="username" placeholder="mario_rossi" required>
                     <span class="error-message" id="loginUsernameError"></span>
                 </div>
                 <div class="form-group">
                     <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required>
+                    <input type="password" id="loginPassword" name="password" placeholder="••••••••" required>
                     <span class="error-message" id="loginPasswordError"></span>
                 </div>
                 <div class="loader" id="loginLoader"></div>
@@ -553,23 +172,23 @@
             <form id="registerForm">
                 <div class="form-group">
                     <label for="registerUsername">Username</label>
-                    <input type="text" id="registerUsername" name="username" required>
+                    <input type="text" id="registerUsername" name="username" placeholder="mario_rossi" required>
                     <span class="error-message" id="registerUsernameError"></span>
                 </div>
                 <div class="form-group">
                     <label for="registerEmail">Email</label>
-                    <input type="email" id="registerEmail" name="email" required>
+                    <input type="email" id="registerEmail" name="email" placeholder="mario@example.com" required>
                     <span class="error-message" id="registerEmailError"></span>
                 </div>
                 <div class="form-group">
                     <label for="registerPassword">Password</label>
-                    <input type="password" id="registerPassword" name="password" required>
+                    <input type="password" id="registerPassword" name="password" placeholder="••••••••" required>
                     <span class="error-message" id="registerPasswordError"></span>
-                    <div class="requirements" id="passwordRequirements"></div>
+                    <div class="requirements" id="passwordRequirements" style="margin-top: 10px;"></div>
                 </div>
                 <div class="form-group">
                     <label for="registerConfirmPassword">Conferma Password</label>
-                    <input type="password" id="registerConfirmPassword" name="confirmPassword" required>
+                    <input type="password" id="registerConfirmPassword" name="confirmPassword" placeholder="••••••••" required>
                     <span class="error-message" id="registerConfirmPasswordError"></span>
                 </div>
                 <div class="loader" id="registerLoader"></div>
@@ -580,110 +199,329 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Create Clan Modal -->
+    <div id="clanModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeClanModal()">&times;</span>
+            <h2>⚔️ Crea Clan</h2>
+            <form id="clanForm">
+                <div class="form-group">
+                    <label for="clanName">Nome del Clan</label>
+                    <input type="text" id="clanName" name="name" placeholder="es. Dragon Slayers" required>
+                    <span class="error-message" id="clanNameError"></span>
+                </div>
+                <div class="form-group">
+                    <label for="clanDescription">Descrizione</label>
+                    <textarea id="clanDescription" name="description" placeholder="Descrivi il tuo clan..." rows="4" required></textarea>
+                    <span class="error-message" id="clanDescriptionError"></span>
+                </div>
+                <div class="loader" id="clanLoader"></div>
+                <button type="submit" class="btn-primary">Crea Clan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-modal" onclick="closeLeaderboardModal()">&times;</span>
+            <h2>🏆 Classifica Globale</h2>
+            <div class="tabs">
+                <button class="tab active" onclick="switchModalLeaderboard('players')">🎮 Giocatori</button>
+                <button class="tab" onclick="switchModalLeaderboard('clans')">⚔️ Clan</button>
+            </div>
+            <div id="modalLeaderboardContainer">
+                <div id="modalPlayersLeaderboard"></div>
+                <div id="modalClansLeaderboard" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/auth.js"></script>
     <script>
         const API_URL = 'http://localhost:3000/api';
-        const CURRENT_USER_ID = 'demo-user';
-        
-        const map = L.map('map').setView([45.4642, 9.1900], 13);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
-        
-        const badgeIcons = {
-            'first-step': '🚶',
-            'explorer': '🗺️',
-            'conqueror': '👑',
-            'marathon': '🏃',
-            'champion': '🏆'
-        };
-        
+
+        let map;
+        let currentUser = null;
+        let authToken = null;
+
+        // Initialize Map
+        function initializeMap() {
+            map = L.map('map').setView([45.4642, 9.1900], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                className: 'map-tiles'
+            }).addTo(map);
+        }
+
+        // Load Territories
         async function loadTerritories() {
             try {
                 const response = await fetch(`${API_URL}/territories`);
                 const territories = await response.json();
-                
+
                 territories.forEach(territory => {
                     const coords = territory.coordinates.map(c => [c.latitude, c.longitude]);
-                    const color = territory.userId === CURRENT_USER_ID ? '#667eea' : '#e74c3c';
-                    
+                    const isOwner = currentUser && territory.userId === currentUser.id;
+                    const color = isOwner ? '#667eea' : '#ef4444';
+
                     L.polygon(coords, {
                         color: color,
                         fillColor: color,
                         fillOpacity: 0.3,
                         weight: 2
                     }).addTo(map).bindPopup(`
-                        <b>Territorio ${territory.id.slice(0, 8)}</b><br>
+                        <b>Territorio</b><br>
                         Area: ${Math.round(territory.area)} m²<br>
-                        Conquistato: ${new Date(territory.conqueredAt).toLocaleDateString()}
+                        Conquistato: ${new Date(territory.conqueredAt).toLocaleDateString('it-IT')}
                     `);
                 });
             } catch (error) {
                 console.error('Errore nel caricamento dei territori:', error);
             }
         }
-        
-        async function loadStats() {
+
+        // Load User Stats
+        async function loadUserStats() {
+            if (!currentUser) return;
+
             try {
-                const response = await fetch(`${API_URL}/users/${CURRENT_USER_ID}/stats`);
+                const response = await fetch(`${API_URL}/users/${currentUser.id}/stats`);
                 const data = await response.json();
-                
-                document.getElementById('territories').textContent = data.stats.territoriesCount;
-                document.getElementById('area').textContent = Math.round(data.stats.totalArea);
-                document.getElementById('distance').textContent = (data.stats.totalDistance / 1000).toFixed(2);
-                document.getElementById('level').textContent = data.stats.level;
-                
-                const badgesContainer = document.getElementById('badges');
-                if (data.stats.badges.length > 0) {
-                    badgesContainer.innerHTML = '';
-                    const badgesList = await fetch(`${API_URL}/badges`).then(r => r.json());
-                    data.stats.badges.forEach(badgeId => {
-                        const badge = badgesList.find(b => b.id === badgeId);
-                        if (badge) {
-                            const div = document.createElement('div');
-                            div.className = 'badge';
-                            div.innerHTML = `${badge.icon} ${badge.name}`;
-                            div.title = badge.description;
-                            badgesContainer.appendChild(div);
-                        }
-                    });
-                }
+
+                document.getElementById('userTerritories').textContent = data.stats.territoriesCount;
+                document.getElementById('userDistance').textContent = (data.stats.totalDistance / 1000).toFixed(1);
+                document.getElementById('userLevel').textContent = data.stats.level;
+                document.getElementById('userArea').textContent = Math.round(data.stats.totalArea);
             } catch (error) {
                 console.error('Errore nel caricamento delle statistiche:', error);
             }
         }
-        
-        async function loadChallenges() {
+
+        // Load Global Leaderboard
+        async function loadLeaderboard() {
             try {
-                const response = await fetch(`${API_URL}/challenges/user/${CURRENT_USER_ID}`);
-                const challenges = await response.json();
-                
-                const container = document.getElementById('challenges');
-                if (challenges.length > 0) {
-                    container.innerHTML = '';
-                    challenges.forEach(challenge => {
-                        const div = document.createElement('div');
-                        div.className = 'challenge-item';
-                        div.innerHTML = `
-                            <strong>Sfida ${challenge.id.slice(0, 8)}</strong><br>
-                            Territorio: ${challenge.territoryId.slice(0, 8)}<br>
-                            <span class="challenge-status status-${challenge.status}">${challenge.status.toUpperCase()}</span>
-                        `;
-                        container.appendChild(div);
-                    });
-                }
+                const response = await fetch(`${API_URL}/users/leaderboard`);
+                const leaderboard = await response.json();
+
+                const container = document.getElementById('usersLeaderboard');
+                container.innerHTML = '';
+
+                leaderboard.slice(0, 10).forEach((entry, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">#${entry.rank}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${entry.username}</div>
+                            <div class="leaderboard-details">Livello ${entry.level} • ${entry.totalDistance.toFixed(1)} km</div>
+                        </div>
+                        <div class="leaderboard-score">${entry.totalArea.toFixed(0)} m²</div>
+                    `;
+                    container.appendChild(item);
+                });
             } catch (error) {
-                console.error('Errore nel caricamento delle sfide:', error);
+                console.error('Errore nel caricamento della classifica:', error);
             }
         }
-        
-        loadTerritories();
-        
-        console.log('🌍 GeoConquer Map Demo');
-        console.log('Visita http://localhost:3000/api per l\'API completa');
+
+        // Load Clans Leaderboard
+        async function loadClansLeaderboard() {
+            try {
+                const response = await fetch(`${API_URL}/clans/leaderboard`);
+                const leaderboard = await response.json();
+
+                const container = document.getElementById('clansLeaderboard');
+                container.innerHTML = '';
+
+                leaderboard.slice(0, 10).forEach((clan, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-rank">#${clan.rank}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${clan.name}</div>
+                            <div class="leaderboard-details">Livello ${clan.level} • ${clan.membersCount} membri</div>
+                        </div>
+                        <div class="leaderboard-score">${clan.totalArea.toFixed(0)} m²</div>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento della classifica clan:', error);
+            }
+        }
+
+        // Load All Clans
+        async function loadAllClans() {
+            try {
+                const response = await fetch(`${API_URL}/clans`);
+                const clans = await response.json();
+
+                const container = document.getElementById('clansList');
+                container.innerHTML = '';
+
+                clans.slice(0, 5).forEach(clan => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${clan.clan.name}</div>
+                            <div class="leaderboard-details">${clan.clan.description.substring(0, 40)}...</div>
+                        </div>
+                        <button class="btn-secondary btn-small" onclick="joinClan('${clan.clan.id}')">Entra</button>
+                    `;
+                    container.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Errore nel caricamento dei clan:', error);
+            }
+        }
+
+        // Switch Leaderboard
+        function switchLeaderboard(type) {
+            document.getElementById('usersLeaderboard').style.display = type === 'users' ? 'block' : 'none';
+            document.getElementById('clansLeaderboard').style.display = type === 'clans' ? 'block' : 'none';
+
+            document.querySelectorAll('#leaderboardContainer .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (type === 'clans') {
+                loadClansLeaderboard();
+            }
+        }
+
+        // Switch Modal Leaderboard
+        function switchModalLeaderboard(type) {
+            document.getElementById('modalPlayersLeaderboard').style.display = type === 'players' ? 'block' : 'none';
+            document.getElementById('modalClansLeaderboard').style.display = type === 'clans' ? 'block' : 'none';
+
+            document.querySelectorAll('#leaderboardModal .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Show Leaderboard Modal
+        function showLeaderboardModal() {
+            document.getElementById('leaderboardModal').classList.add('active');
+            loadLeaderboard();
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('leaderboardModal').classList.remove('active');
+        }
+
+        // Show Clan Modal
+        function showClanModal() {
+            if (!currentUser) {
+                showLoginModal();
+                return;
+            }
+            document.getElementById('clanModal').classList.add('active');
+        }
+
+        function closeClanModal() {
+            document.getElementById('clanModal').classList.remove('active');
+        }
+
+        // Create Clan
+        document.getElementById('clanForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('clanName').value.trim();
+            const description = document.getElementById('clanDescription').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/clans`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': currentUser.id
+                    },
+                    body: JSON.stringify({ name, description })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert('Errore: ' + data.error);
+                    return;
+                }
+
+                alert('Clan creato con successo!');
+                closeClanModal();
+                document.getElementById('clanForm').reset();
+                loadAllClans();
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        });
+
+        // Join Clan
+        async function joinClan(clanId) {
+            if (!currentUser) {
+                showLoginModal();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/clans/${clanId}/join`, {
+                    method: 'POST',
+                    headers: {
+                        'user-id': currentUser.id
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert('Errore: ' + data.error);
+                    return;
+                }
+
+                alert('Hai aderito al clan!');
+                loadAllClans();
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        // Update UI based on auth status
+        function updateUIForUser() {
+            if (currentUser) {
+                document.getElementById('userStatsCard').style.display = 'block';
+                document.getElementById('quickActionsCard').style.display = 'block';
+                document.getElementById('badgesCard').style.display = 'block';
+                document.getElementById('clanCard').style.display = 'block';
+
+                loadUserStats();
+                loadAllClans();
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initializeMap();
+            loadTerritories();
+            loadLeaderboard();
+            loadAllClans();
+            checkAuthStatus();
+            updateUIForUser();
+        });
+
+        window.onclick = function(event) {
+            const loginModal = document.getElementById('loginModal');
+            const registerModal = document.getElementById('registerModal');
+            const clanModal = document.getElementById('clanModal');
+            const leaderboardModal = document.getElementById('leaderboardModal');
+
+            if (event.target === loginModal) closeLoginModal();
+            if (event.target === registerModal) closeRegisterModal();
+            if (event.target === clanModal) closeClanModal();
+            if (event.target === leaderboardModal) closeLeaderboardModal();
+        };
     </script>
 </body>
 </html>
