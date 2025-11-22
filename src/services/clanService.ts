@@ -1,10 +1,25 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Clan, ClanMember, ClanStats } from '../types/clan';
 import { db } from '../models/database';
+import { dataService } from './dataService';
 
 export class ClanService {
   private clans: Map<string, Clan> = new Map();
   private clanMembers: Map<string, ClanMember[]> = new Map();
+
+  constructor() {
+    this.loadFromDisk();
+  }
+
+  private loadFromDisk(): void {
+    const data = dataService.readData('clans.json', {});
+    this.clans = new Map(Object.entries(data));
+  }
+
+  private saveToDisk(): void {
+    const data = Object.fromEntries(this.clans);
+    dataService.writeData('clans.json', data);
+  }
 
   async createClan(
     name: string,
@@ -46,6 +61,7 @@ export class ClanService {
       }
     ]);
 
+    this.saveToDisk();
     return clan;
   }
 
@@ -91,6 +107,7 @@ export class ClanService {
     });
     this.clanMembers.set(clanId, members);
 
+    this.saveToDisk();
     return clan;
   }
 
@@ -112,6 +129,8 @@ export class ClanService {
       clanId,
       members.filter(m => m.userId !== userId)
     );
+
+    this.saveToDisk();
   }
 
   async getClanMembers(clanId: string): Promise<ClanMember[]> {
@@ -167,6 +186,7 @@ export class ClanService {
 
     this.clans.delete(clanId);
     this.clanMembers.delete(clanId);
+    this.saveToDisk();
   }
 
   async getClanLeaderboard(clanId: string, limit: number = 10): Promise<Array<{ userId: string; contribution: number; role: string }>> {

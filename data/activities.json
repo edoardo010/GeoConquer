@@ -1,0 +1,26 @@
+{
+  "1f2292ae-1ab9-4adf-be68-6ad5b4269a29": {
+    "id": "1f2292ae-1ab9-4adf-be68-6ad5b4269a29",
+    "userId": "test-persist-001",
+    "username": "user",
+    "type": "running",
+    "title": "Test Persistenza",
+    "distance": 5,
+    "duration": 45,
+    "calories": 300,
+    "startTime": "2024-11-22T07:00:00.000Z",
+    "endTime": "2024-11-22T07:45:00.000Z",
+    "coordinates": [
+      {
+        "latitude": 45.5,
+        "longitude": 9.2
+      }
+    ],
+    "avgSpeed": 6.7,
+    "maxSpeed": 9,
+    "elevation": 0,
+    "loggedBy": "user",
+    "createdAt": "2025-11-22T18:37:23.822Z",
+    "updatedAt": "2025-11-22T18:37:23.822Z"
+  }
+}

@@ -1,9 +1,35 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Activity, ActivityStats, ActivityFilter } from '../types/activity';
+import { dataService } from './dataService';
 
 export class ActivityService {
   private activities: Map<string, Activity> = new Map();
   private userActivities: Map<string, string[]> = new Map();
+
+  constructor() {
+    this.loadFromDisk();
+  }
+
+  // Carica dati da file
+  private loadFromDisk(): void {
+    const data = dataService.readData('activities.json', {});
+    this.activities = new Map(Object.entries(data));
+    
+    // Ricostruisci userActivities
+    this.userActivities.clear();
+    this.activities.forEach(activity => {
+      if (!this.userActivities.has(activity.userId)) {
+        this.userActivities.set(activity.userId, []);
+      }
+      this.userActivities.get(activity.userId)!.push(activity.id);
+    });
+  }
+
+  // Salva dati su file
+  private saveToDisk(): void {
+    const data = Object.fromEntries(this.activities);
+    dataService.writeData('activities.json', data);
+  }
 
   async createActivity(
     userId: string,
@@ -58,6 +84,7 @@ export class ActivityService {
     }
     this.userActivities.get(userId)!.push(id);
 
+    this.saveToDisk();
     return activity;
   }
 
@@ -183,6 +210,7 @@ export class ActivityService {
 
     const updated = { ...activity, ...updates, updatedAt: new Date() };
     this.activities.set(id, updated);
+    this.saveToDisk();
     return updated;
   }
 
@@ -197,6 +225,7 @@ export class ActivityService {
     );
 
     this.activities.delete(id);
+    this.saveToDisk();
     return true;
   }
 

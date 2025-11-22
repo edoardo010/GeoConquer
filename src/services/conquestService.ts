@@ -1,9 +1,32 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ConquestRecord, ConquestStats } from '../types/conquest';
+import { dataService } from './dataService';
 
 export class ConquestService {
   private conquests: Map<string, ConquestRecord> = new Map();
   private userConquests: Map<string, string[]> = new Map();
+
+  constructor() {
+    this.loadFromDisk();
+  }
+
+  private loadFromDisk(): void {
+    const data = dataService.readData('conquests.json', {});
+    this.conquests = new Map(Object.entries(data));
+    
+    this.userConquests.clear();
+    this.conquests.forEach(conquest => {
+      if (!this.userConquests.has(conquest.userId)) {
+        this.userConquests.set(conquest.userId, []);
+      }
+      this.userConquests.get(conquest.userId)!.push(conquest.id);
+    });
+  }
+
+  private saveToDisk(): void {
+    const data = Object.fromEntries(this.conquests);
+    dataService.writeData('conquests.json', data);
+  }
 
   async createConquestRecord(
     userId: string,
@@ -37,6 +60,7 @@ export class ConquestService {
     }
     this.userConquests.get(userId)!.push(id);
 
+    this.saveToDisk();
     return conquest;
   }
 
@@ -72,6 +96,7 @@ export class ConquestService {
     conquest.approvedAt = new Date();
     conquest.approvedBy = adminId;
 
+    this.saveToDisk();
     return conquest;
   }
 
@@ -84,6 +109,7 @@ export class ConquestService {
     conquest.approvedAt = new Date();
     conquest.approvedBy = adminId;
 
+    this.saveToDisk();
     return conquest;
   }
 
