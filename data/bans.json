@@ -1,0 +1,11 @@
+{
+  "test-cheat-002": {
+    "id": "8820b9b9-5ee2-4f5b-bd76-e2f5e4d5ef48",
+    "userId": "test-cheat-002",
+    "username": "player",
+    "reason": "Tentativo di cheat: velocità impossibile (163.4km/h)",
+    "bannedAt": "2025-11-22T18:50:42.116Z",
+    "unbannedAt": "2025-11-23T18:50:42.116Z",
+    "active": true
+  }
+}

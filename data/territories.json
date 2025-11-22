@@ -1,0 +1,43 @@
+{
+  "4215beec-54a9-4e05-bdeb-1328d98bdb6c": {
+    "id": "4215beec-54a9-4e05-bdeb-1328d98bdb6c",
+    "userId": "test-cheat-001",
+    "username": "player",
+    "startPoint": {
+      "latitude": 45.4831,
+      "longitude": 9.1747
+    },
+    "endPoint": {
+      "latitude": 45.5,
+      "longitude": 9.2
+    },
+    "distance": 2.724080126961388,
+    "duration": 5,
+    "calculatedSpeed": 32.688961523536655,
+    "status": "pending",
+    "cheatDetected": false,
+    "createdAt": "2025-11-22T18:50:30.966Z",
+    "updatedAt": "2025-11-22T18:50:30.966Z"
+  },
+  "2f94d873-f453-40e7-a631-b05c28d175c4": {
+    "id": "2f94d873-f453-40e7-a631-b05c28d175c4",
+    "userId": "test-cheat-002",
+    "username": "player",
+    "startPoint": {
+      "latitude": 45.4831,
+      "longitude": 9.1747
+    },
+    "endPoint": {
+      "latitude": 45.5,
+      "longitude": 9.2
+    },
+    "distance": 2.724080126961388,
+    "duration": 1,
+    "calculatedSpeed": 163.44480761768327,
+    "status": "flagged_cheat",
+    "cheatDetected": true,
+    "createdAt": "2025-11-22T18:50:42.116Z",
+    "updatedAt": "2025-11-22T18:50:42.116Z",
+    "reason": "CHEAT RILEVATO: Velocità impossibile (163.4km/h > 60km/h) - Ban di 1 giorno applicato"
+  }
+}
