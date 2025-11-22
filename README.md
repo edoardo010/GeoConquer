@@ -90,6 +90,8 @@ npm run demo
 - **[DATABASE_OPTIONS.md](./DATABASE_OPTIONS.md)** - Opzioni professionali per database (PostgreSQL, MongoDB, Firebase, DynamoDB)
 - **[API.md](./API.md)** - Documentazione degli endpoint API
 - **[UI_GUIDE.md](./UI_GUIDE.md)** - Guida dell'interfaccia e design premium dark theme
+- **[CONQUEST_SYSTEM.md](./CONQUEST_SYSTEM.md)** - Sistema di conquiste territoriali con approvazione admin
+- **[ADMIN_CREDENTIALS.md](./ADMIN_CREDENTIALS.md)** - Credenziali admin uniche per il pannello di controllo
 
 ---
 

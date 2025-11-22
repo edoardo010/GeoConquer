@@ -6,6 +6,7 @@ import territoryRoutes from './routes/territoryRoutes';
 import challengeRoutes from './routes/challengeRoutes';
 import authRoutes from './routes/authRoutes';
 import clanRoutes from './routes/clanRoutes';
+import conquestRoutes from './routes/conquestRoutes';
 import { db } from './models/database';
 
 const app = express();
@@ -38,6 +39,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/territories', territoryRoutes);
 app.use('/api/challenges', challengeRoutes);
 app.use('/api/clans', clanRoutes);
+app.use('/api/conquests', conquestRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found' });
