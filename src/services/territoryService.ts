@@ -37,7 +37,8 @@ export class TerritoryService {
     startLon: number,
     endLat: number,
     endLon: number,
-    durationMinutes: number
+    durationMinutes: number,
+    allPoints?: any[]
   ): Promise<{
     success: boolean;
     conquest?: TerritoryConquest;

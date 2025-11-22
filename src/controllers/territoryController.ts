@@ -5,18 +5,19 @@ import { antiCheatService } from '../services/antiCheatService';
 export const createTerritoryConquest = async (req: Request, res: Response) => {
   try {
     const {
+      points,
+      durationMinutes,
       startLat,
       startLon,
       endLat,
-      endLon,
-      durationMinutes
+      endLon
     } = req.body;
 
     const userId = req.headers['user-id'] as string;
 
-    if (!userId || startLat === undefined || startLon === undefined || endLat === undefined || endLon === undefined || !durationMinutes) {
+    if (!userId || !durationMinutes) {
       return res.status(400).json({
-        error: 'Missing required fields: startLat, startLon, endLat, endLon, durationMinutes'
+        error: 'Missing required fields: points (array of 4 points), durationMinutes'
       });
     }
 
@@ -26,14 +27,32 @@ export const createTerritoryConquest = async (req: Request, res: Response) => {
       });
     }
 
+    // Supporta sia il nuovo formato (4 punti) che il vecchio (start/end per backward compatibility)
+    let finalPoints = points;
+    if (!points && startLat !== undefined && startLon !== undefined && endLat !== undefined && endLon !== undefined) {
+      finalPoints = [
+        { latitude: startLat, longitude: startLon },
+        { latitude: endLat, longitude: endLon },
+        { latitude: startLat, longitude: startLon },
+        { latitude: endLat, longitude: endLon }
+      ];
+    }
+
+    if (!finalPoints || finalPoints.length !== 4) {
+      return res.status(400).json({
+        error: 'Devi fornire esattamente 4 punti per definire il territorio'
+      });
+    }
+
     const result = await territoryService.createTerritoryConquest(
       userId,
       'player',
-      startLat,
-      startLon,
-      endLat,
-      endLon,
-      durationMinutes
+      finalPoints[0].latitude,
+      finalPoints[0].longitude,
+      finalPoints[2].latitude,
+      finalPoints[2].longitude,
+      durationMinutes,
+      finalPoints
     );
 
     if (!result.success) {

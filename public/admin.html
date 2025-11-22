@@ -365,8 +365,10 @@
             <button class="admin-nav-btn" onclick="switchAdminSection('approved')">✅ Approvate</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('rejected')">❌ Rifiutate</button>
             <button class="admin-nav-btn" onclick="switchAdminSection('all')">📋 Tutte</button>
-            <button class="admin-nav-btn" onclick="switchAdminSection('activities')">🏃 Attività Utenti</button>
-            <button class="admin-nav-btn" onclick="switchAdminSection('logActivity')">📝 Registra Attività</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('territories')">🗺️ Territori</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('bans')">🚫 Ban</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('activities')">🏃 Attività</button>
+            <button class="admin-nav-btn" onclick="switchAdminSection('logActivity')">📝 Log Attività</button>
             <button class="admin-logout" onclick="handleAdminLogout()">Esci</button>
         </div>
 
@@ -432,6 +434,23 @@
                 <div id="allSection" class="admin-section" style="display: none;">
                     <h2>📋 Tutte le Conquiste</h2>
                     <div id="allList"></div>
+                </div>
+
+                <!-- Territory Conquests Section -->
+                <div id="territoriesSection" class="admin-section" style="display: none;">
+                    <h2>🗺️ Conquiste Territoriali</h2>
+                    <div class="filters">
+                        <button class="filter-btn active" onclick="filterTerritories('pending')">⏳ In Sospeso</button>
+                        <button class="filter-btn" onclick="filterTerritories('approved')">✅ Approvate</button>
+                        <button class="filter-btn" onclick="filterTerritories('flagged')">🚨 Cheat Rilevati</button>
+                    </div>
+                    <div id="territoriesList"></div>
+                </div>
+
+                <!-- Bans Section -->
+                <div id="bansSection" class="admin-section" style="display: none;">
+                    <h2>🚫 Ban Attivi</h2>
+                    <div id="bansList"></div>
                 </div>
 
                 <!-- Activities Section -->
@@ -541,6 +560,10 @@
                     loadConquests('rejected');
                 } else if (section === 'all') {
                     loadConquests('all');
+                } else if (section === 'territories') {
+                    loadTerritories('pending');
+                } else if (section === 'bans') {
+                    loadBans();
                 } else if (section === 'activities') {
                     loadActivities();
                 }
@@ -924,6 +947,222 @@
             } finally {
                 document.getElementById('logActivityLoader').classList.remove('show');
                 submitBtn.disabled = false;
+            }
+        }
+
+        async function loadTerritories(status = 'pending') {
+            try {
+                let endpoint = '';
+                if (status === 'flagged') {
+                    endpoint = `${API_URL}/territory-conquests/admin/flagged`;
+                } else if (status === 'pending') {
+                    endpoint = `${API_URL}/territory-conquests/admin/pending`;
+                } else {
+                    endpoint = `${API_URL}/territory-conquests/admin/stats`;
+                }
+
+                const response = await fetch(endpoint, {
+                    headers: { 'admin-id': adminId }
+                });
+
+                const data = await response.json();
+                const conquests = data.conquests || [];
+
+                const container = document.getElementById('territoriesList');
+                if (!container) return;
+
+                if (conquests.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">🗺️</div><p>Nessuna conquista territoriale</p></div>';
+                    return;
+                }
+
+                container.innerHTML = conquests.map(conquest => `
+                    <div class="conquest-item">
+                        <div class="conquest-header">
+                            <div>
+                                <div class="conquest-user">👤 ${conquest.username}</div>
+                                <div style="color: var(--text-muted); font-size: 0.9em; margin-top: 5px;">
+                                    🗺️ Territorio conquistato
+                                </div>
+                            </div>
+                            <span class="conquest-status status-${conquest.status}">
+                                ${conquest.status === 'flagged_cheat' ? '🚨 CHEAT' : conquest.status.toUpperCase()}
+                            </span>
+                        </div>
+                        <div class="conquest-details">
+                            <div class="detail-item">
+                                <div class="detail-label">📏 Distanza</div>
+                                <div class="detail-value">${conquest.distance.toFixed(2)} km</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">⏱️ Durata</div>
+                                <div class="detail-value">${conquest.duration} min</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">⚡ Velocità</div>
+                                <div class="detail-value">${conquest.calculatedSpeed.toFixed(1)} km/h</div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="detail-label">📅 Data</div>
+                                <div class="detail-value">${new Date(conquest.createdAt).toLocaleDateString('it-IT')}</div>
+                            </div>
+                        </div>
+                        ${conquest.status === 'pending' ? `
+                            <div class="conquest-actions">
+                                <button class="action-btn action-approve" onclick="approveTerritoryConquest('${conquest.id}')">✅ Approva</button>
+                                <button class="action-btn action-reject" onclick="toggleTerritoryRejectionForm('${conquest.id}')">❌ Rifiuta</button>
+                            </div>
+                            <div class="rejection-form" id="form-${conquest.id}">
+                                <textarea id="reason-${conquest.id}" placeholder="Motivo del rifiuto..."></textarea>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="action-btn action-reject" onclick="rejectTerritoryConquest('${conquest.id}')" style="flex: 1;">Conferma Rifiuto</button>
+                                    <button class="action-btn" style="flex: 1; background: var(--text-muted);" onclick="toggleTerritoryRejectionForm('${conquest.id}')">Annulla</button>
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${conquest.cheatDetected ? `
+                            <div class="detail-item">
+                                <div class="detail-label">🚨 Motivo Cheat</div>
+                                <div class="detail-value">${conquest.reason}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Errore caricamento territori:', error);
+            }
+        }
+
+        function filterTerritories(status) {
+            document.querySelectorAll('#territoriesSection .filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            loadTerritories(status);
+        }
+
+        function toggleTerritoryRejectionForm(id) {
+            const form = document.getElementById(`form-${id}`);
+            if (form) form.classList.toggle('active');
+        }
+
+        async function approveTerritoryConquest(id) {
+            try {
+                const response = await fetch(`${API_URL}/territory-conquests/${id}/approve`, {
+                    method: 'POST',
+                    headers: { 'admin-id': adminId }
+                });
+
+                if (response.ok) {
+                    alert('✅ Territorio approvato!');
+                    loadTerritories('pending');
+                } else {
+                    alert('Errore approvazione');
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function rejectTerritoryConquest(id) {
+            const reason = document.getElementById(`reason-${id}`).value;
+            if (!reason.trim()) {
+                alert('Inserisci un motivo');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/territory-conquests/${id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'admin-id': adminId
+                    },
+                    body: JSON.stringify({ reason })
+                });
+
+                if (response.ok) {
+                    alert('❌ Territorio rifiutato!');
+                    loadTerritories('pending');
+                } else {
+                    alert('Errore rifiuto');
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
+            }
+        }
+
+        async function loadBans() {
+            try {
+                const response = await fetch(`${API_URL}/territory-conquests/admin/bans`, {
+                    headers: { 'admin-id': adminId }
+                });
+
+                const data = await response.json();
+                const bans = data.bans || [];
+
+                const container = document.getElementById('bansList');
+                if (!container) return;
+
+                if (bans.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>Nessun ban attivo</p></div>';
+                    return;
+                }
+
+                container.innerHTML = bans.map(ban => {
+                    const timeRemaining = Math.ceil((new Date(ban.unbannedAt).getTime() - new Date().getTime()) / 1000);
+                    const hours = Math.ceil(timeRemaining / 3600);
+                    return `
+                        <div class="conquest-item">
+                            <div class="conquest-header">
+                                <div>
+                                    <div class="conquest-user">🚫 ${ban.username}</div>
+                                    <div style="color: var(--text-muted); font-size: 0.9em; margin-top: 5px;">
+                                        ${ban.reason}
+                                    </div>
+                                </div>
+                                <span class="conquest-status status-rejected">BANNATO</span>
+                            </div>
+                            <div class="conquest-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">⏰ Tempo Rimanente</div>
+                                    <div class="detail-value">${hours}h</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">📅 Bannato il</div>
+                                    <div class="detail-value">${new Date(ban.bannedAt).toLocaleDateString('it-IT')}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">🔓 Sbannato il</div>
+                                    <div class="detail-value">${new Date(ban.unbannedAt).toLocaleDateString('it-IT')}</div>
+                                </div>
+                            </div>
+                            <div class="conquest-actions">
+                                <button class="action-btn action-approve" onclick="removeBanManual('${ban.userId}')" style="flex: 1;">🔓 Rimuovi Ban</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Errore caricamento ban:', error);
+            }
+        }
+
+        async function removeBanManual(userId) {
+            if (!confirm('Sei sicuro di voler rimuovere il ban?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/territory-conquests/admin/ban/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'admin-id': adminId }
+                });
+
+                if (response.ok) {
+                    alert('✅ Ban rimosso!');
+                    loadBans();
+                } else {
+                    alert('Errore rimozione ban');
+                }
+            } catch (error) {
+                alert('Errore: ' + error.message);
             }
         }
 

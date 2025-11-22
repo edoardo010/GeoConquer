@@ -663,8 +663,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // ===== TERRITORY CONQUEST FUNCTIONS =====
 
 let conquestMap = null;
-let conquestStartPoint = null;
-let conquestEndPoint = null;
+let conquestPoints = [];
+let conquestPolyline = null;
+let conquestMarkers = [];
 
 function showConquestMapModal() {
   if (!appState.isLoggedIn()) {
@@ -686,8 +687,8 @@ function showConquestMapModal() {
       const modal = document.getElementById('conquestMapModal');
       if (modal) {
         modal.classList.add('active');
-        conquestStartPoint = null;
-        conquestEndPoint = null;
+        conquestPoints = [];
+        conquestMarkers = [];
         document.getElementById('conquestDuration').value = '';
         document.getElementById('conquestInfo').style.display = 'none';
         
@@ -714,47 +715,70 @@ function closeConquestMapModal() {
   if (conquestMap) {
     conquestMap.off('click');
   }
-  conquestStartPoint = null;
-  conquestEndPoint = null;
+  conquestPoints = [];
+  conquestMarkers = [];
+  if (conquestPolyline) {
+    conquestMap.removeLayer(conquestPolyline);
+    conquestPolyline = null;
+  }
+}
+
+function resetConquestPoints() {
+  conquestPoints = [];
+  conquestMarkers.forEach(marker => conquestMap.removeLayer(marker));
+  conquestMarkers = [];
+  if (conquestPolyline) {
+    conquestMap.removeLayer(conquestPolyline);
+    conquestPolyline = null;
+  }
+  document.getElementById('conquestInfo').style.display = 'none';
+  alert('✅ Punti resettati! Puoi ricominciare a cliccare sulla mappa.');
 }
 
 function handleConquestMapClick(e) {
-  if (!conquestStartPoint) {
-    conquestStartPoint = e.latlng;
-    L.circleMarker([e.latlng.lat, e.latlng.lng], {
-      radius: 8,
-      fillColor: '#667eea',
-      color: '#fff',
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0.8
-    }).addTo(conquestMap).bindPopup('📍 Punto di Partenza');
-    
-    alert('✅ Punto di partenza segnato! Clicca di nuovo per il punto di arrivo');
-  } else if (!conquestEndPoint) {
-    conquestEndPoint = e.latlng;
-    L.circleMarker([e.latlng.lat, e.latlng.lng], {
-      radius: 8,
-      fillColor: '#ef4444',
-      color: '#fff',
-      weight: 2,
-      opacity: 1,
-      fillOpacity: 0.8
-    }).addTo(conquestMap).bindPopup('🏁 Punto di Arrivo');
+  if (conquestPoints.length >= 4) {
+    alert('⛔ Hai già selezionato 4 punti! Clicca "Resetta Punti" per ricominciare.');
+    return;
+  }
 
-    // Disegna linea
-    L.polyline([
-      [conquestStartPoint.lat, conquestStartPoint.lng],
-      [conquestEndPoint.lat, conquestEndPoint.lng]
-    ], {
+  conquestPoints.push(e.latlng);
+  const pointNumber = conquestPoints.length;
+  const colors = ['#667eea', '#10b981', '#f39c12', '#ef4444'];
+  const labels = ['1️⃣', '2️⃣', '3️⃣', '4️⃣'];
+
+  const marker = L.circleMarker([e.latlng.lat, e.latlng.lng], {
+    radius: 10,
+    fillColor: colors[pointNumber - 1],
+    color: '#fff',
+    weight: 2,
+    opacity: 1,
+    fillOpacity: 0.8
+  }).addTo(conquestMap).bindPopup(`${labels[pointNumber - 1]} Punto ${pointNumber}`);
+
+  conquestMarkers.push(marker);
+  alert(`✅ Punto ${pointNumber} segnato!`);
+
+  // Quando raggiunge 4 punti, chiudi la mappa ai click e disegna il poligono
+  if (conquestPoints.length === 4) {
+    conquestMap.off('click');
+    
+    // Disegna il poligono
+    if (conquestPolyline) {
+      conquestMap.removeLayer(conquestPolyline);
+    }
+    
+    const pointsArray = conquestPoints.map(p => [p.lat, p.lng]);
+    pointsArray.push(pointsArray[0]); // Chiudi il poligono
+    
+    conquestPolyline = L.polyline(pointsArray, {
       color: '#667eea',
-      weight: 2,
+      weight: 3,
       opacity: 0.7,
       dashArray: '5, 5'
     }).addTo(conquestMap);
 
-    conquestMap.off('click');
     updateConquestInfo();
+    alert('🎯 Territorio definito! Inserisci il tempo impiegato e invia la conquista.');
   }
 }
 
@@ -773,19 +797,26 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 function updateConquestInfo() {
-  if (!conquestStartPoint || !conquestEndPoint) return;
+  if (conquestPoints.length < 4) return;
 
-  const distance = calculateDistance(
-    conquestStartPoint.lat,
-    conquestStartPoint.lng,
-    conquestEndPoint.lat,
-    conquestEndPoint.lng
-  );
+  // Calcola perimetro del territorio (distanza totale tra i 4 punti)
+  let totalDistance = 0;
+  for (let i = 0; i < conquestPoints.length; i++) {
+    const currentPoint = conquestPoints[i];
+    const nextPoint = conquestPoints[(i + 1) % conquestPoints.length]; // Torna al primo punto alla fine
+    const dist = calculateDistance(
+      currentPoint.lat,
+      currentPoint.lng,
+      nextPoint.lat,
+      nextPoint.lng
+    );
+    totalDistance += dist;
+  }
 
   const duration = parseFloat(document.getElementById('conquestDuration').value) || 0;
-  const speed = duration > 0 ? (distance / (duration / 60)).toFixed(1) : 0;
+  const speed = duration > 0 ? (totalDistance / (duration / 60)).toFixed(1) : 0;
 
-  document.getElementById('conquestDistance').textContent = distance.toFixed(2);
+  document.getElementById('conquestDistance').textContent = totalDistance.toFixed(2);
   document.getElementById('conquestSpeed').textContent = speed;
   document.getElementById('conquestInfo').style.display = 'block';
 
@@ -803,8 +834,8 @@ function updateConquestInfo() {
 }
 
 function submitConquest() {
-  if (!conquestStartPoint || !conquestEndPoint) {
-    alert('Seleziona entrambi i punti sulla mappa');
+  if (conquestPoints.length < 4) {
+    alert('Devi selezionare 4 punti sulla mappa per definire il territorio');
     return;
   }
 
@@ -823,10 +854,7 @@ function submitConquest() {
       'user-id': appState.currentUser.id
     },
     body: JSON.stringify({
-      startLat: conquestStartPoint.lat,
-      startLon: conquestStartPoint.lng,
-      endLat: conquestEndPoint.lat,
-      endLon: conquestEndPoint.lng,
+      points: conquestPoints.map(p => ({ latitude: p.lat, longitude: p.lng })),
       durationMinutes: duration
     })
   })
@@ -864,6 +892,7 @@ window.handleLogout = handleLogout;
 window.showConquestMapModal = showConquestMapModal;
 window.closeConquestMapModal = closeConquestMapModal;
 window.submitConquest = submitConquest;
+window.resetConquestPoints = resetConquestPoints;
 window.showClanModal = showClanModal;
 window.closeClanModal = closeClanModal;
 window.joinClan = joinClan;
