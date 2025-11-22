@@ -14,5 +14,20 @@
     "totalDistance": 0,
     "createdAt": "2025-11-22T19:02:15.234Z",
     "updatedAt": "2025-11-22T19:02:15.240Z"
+  },
+  "345d98e7-bb8e-441a-bfd3-bf04d9f96c4f": {
+    "id": "345d98e7-bb8e-441a-bfd3-bf04d9f96c4f",
+    "name": "Elite Warriors",
+    "description": "Il miglior clan",
+    "founderId": "test-user-123",
+    "members": [
+      "test-user-123"
+    ],
+    "level": 1,
+    "experience": 0,
+    "totalArea": 0,
+    "totalDistance": 0,
+    "createdAt": "2025-11-22T21:23:33.251Z",
+    "updatedAt": "2025-11-22T21:23:33.251Z"
   }
 }

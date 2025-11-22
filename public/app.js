@@ -545,10 +545,46 @@ async function joinClan(clanId) {
       return;
     }
 
-    alert('Hai aderito al clan!');
-    if (typeof loadAllClans === 'function') loadAllClans();
+    alert('✅ Hai aderito al clan!');
+    loadAllClans();
   } catch (error) {
     alert('Errore di connessione: ' + error.message);
+  }
+}
+
+async function loadAllClans() {
+  try {
+    const response = await fetch(`${API_URL}/clans`);
+    const data = await response.json();
+    const clans = data.clans || [];
+
+    const container = document.getElementById('allClansContainer');
+    if (!container) return;
+
+    if (clans.length === 0) {
+      container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Nessun clan disponibile</p>';
+      return;
+    }
+
+    container.innerHTML = clans.map(clan => `
+      <div class="clan-card" style="background: var(--bg-card); padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid #667eea;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+          <div>
+            <h4 style="margin: 0 0 5px 0; color: var(--text-primary);">⚔️ ${clan.name}</h4>
+            <p style="margin: 0; color: var(--text-muted); font-size: 0.9em;">${clan.description}</p>
+          </div>
+          <span style="background: #667eea; color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">Livello ${clan.level}</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; font-size: 0.9em;">
+          <div><span style="color: var(--text-muted);">👥 Membri:</span> <span style="color: var(--text-primary); font-weight: 600;">${clan.membersCount || 0}</span></div>
+          <div><span style="color: var(--text-muted);">⚡ Exp:</span> <span style="color: var(--text-primary); font-weight: 600;">${clan.experience || 0}</span></div>
+          <div><span style="color: var(--text-muted);">📍 Area:</span> <span style="color: var(--text-primary); font-weight: 600;">${clan.totalArea ? (clan.totalArea / 1000).toFixed(1) + 'km²' : '0km²'}</span></div>
+        </div>
+        <button class="btn-secondary btn-small" onclick="joinClan('${clan.id}')" style="width: 100%;">⚔️ Aderisci al Clan</button>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Errore caricamento clan:', error);
   }
 }
 
@@ -657,6 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   checkAuthStatus();
+  loadAllClans();
   console.log('App initialized');
 });
 

@@ -94,6 +94,17 @@
                     </div>
                 </div>
 
+                <!-- All Clans Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="margin: 0;">⚔️ Clan Disponibili</h3>
+                        <button class="btn-primary btn-small" onclick="showClanModal()" style="margin-left: auto;">➕ Nuovo Clan</button>
+                    </div>
+                    <div id="allClansContainer" style="max-height: 400px; overflow-y: auto;">
+                        <p style="text-align: center; color: var(--text-muted);">Caricamento...</p>
+                    </div>
+                </div>
+
                 <!-- Your Clan Card -->
                 <div class="card" id="clanCard" style="display: none;">
                     <div class="card-header">
@@ -251,6 +262,28 @@
         </div>
     </div>
 
+    <!-- Clan Modal -->
+    <div id="clanModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeClanModal()">&times;</span>
+            <h2>⚔️ Crea Nuovo Clan</h2>
+            <form id="clanForm" onsubmit="handleCreateClan(event)">
+                <div class="form-group">
+                    <label for="clanName">Nome Clan</label>
+                    <input type="text" id="clanName" placeholder="es. Dragon Slayers" required>
+                    <small id="clanName-error" style="color: #ef4444; display: none;"></small>
+                </div>
+                <div class="form-group">
+                    <label for="clanDescription">Descrizione</label>
+                    <textarea id="clanDescription" placeholder="Descrivi il tuo clan..." style="padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); width: 100%; min-height: 80px;"></textarea>
+                    <small id="clanDescription-error" style="color: #ef4444; display: none;"></small>
+                </div>
+                <div class="loader" id="clan-loader"></div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 15px;">✨ Crea Clan</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Leaderboard Modal -->
     <div id="leaderboardModal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
@@ -268,6 +301,12 @@
     </div>
 
     <!-- Scripts -->
+    <script>
+        // Controlla se setup è completato
+        if (!localStorage.getItem('setupCompleted')) {
+            window.location.href = '/setup.html';
+        }
+    </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="/app.js"></script>
     <script>
