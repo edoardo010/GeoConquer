@@ -4,6 +4,7 @@ import path from 'path';
 import userRoutes from './routes/userRoutes';
 import territoryRoutes from './routes/territoryRoutes';
 import challengeRoutes from './routes/challengeRoutes';
+import authRoutes from './routes/authRoutes';
 import { db } from './models/database';
 
 const app = express();
@@ -31,6 +32,7 @@ app.get('/api/badges', (req, res) => {
   res.json(badges);
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/territories', territoryRoutes);
 app.use('/api/challenges', challengeRoutes);

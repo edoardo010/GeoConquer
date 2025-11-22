@@ -12,12 +12,15 @@ Correndo o camminando, gli utenti possono espandere il proprio territorio virtua
 - **✅ Sfide tra amici**: competi per il controllo di quartieri, parchi o città
 - **✅ Gamification completa**: badge, livelli e ricompense per mantenere alta la motivazione
 - **✅ Salute e benessere**: integra il movimento con obiettivi fitness
+- **✅ Sistema di Autenticazione**: Registrazione e Login utenti con validazione
+- **✅ Database Setup Wizard**: Configurazione guidata per amministratori
+- **✅ Supporto Multi-Database**: PostgreSQL, MongoDB, Firebase, DynamoDB
 
 ---
 
 ## 🚀 Quick Start
 
-### Installazione
+### Installazione e Setup Amministratore
 
 ```bash
 # Clona il repository
@@ -27,8 +30,24 @@ cd GeoConquer
 # Installa le dipendenze
 npm install
 
+# Esegui il Database Setup Wizard per amministratori
+npm run setup:db
+
+# Segui i passaggi interattivi per configurare:
+# - Account amministratore
+# - Tipo di database (PostgreSQL, MongoDB, Firebase, ecc.)
+# - Credenziali database
+# - Porta server
+```
+
+### Avvio del Server
+
+```bash
 # Avvia il server in modalità sviluppo
 npm run dev
+
+# Visita http://localhost:3000
+# Prova: Registrati o Accedi dalla pagina principale!
 ```
 
 ### Demo Rapida
@@ -50,7 +69,23 @@ npm start
 
 ---
 
+## 📖 Documentazione Setup
+
+- **[ADMIN_SETUP.md](./ADMIN_SETUP.md)** - Guida completa per amministratori (Database Setup, Sicurezza, Troubleshooting)
+- **[DATABASE_OPTIONS.md](./DATABASE_OPTIONS.md)** - Opzioni professionali per database (PostgreSQL, MongoDB, Firebase, DynamoDB)
+- **[API.md](./API.md)** - Documentazione degli endpoint API
+
+---
+
 ## 📚 API Endpoints
+
+### Autenticazione
+- `POST /api/auth/register` - Registra nuovo utente
+- `POST /api/auth/login` - Accedi con credenziali
+- `POST /api/auth/logout` - Esci dalla sessione
+- `GET /api/auth/verify` - Verifica token JWT
+- `GET /api/auth/password-requirements` - Requisiti password
+- `GET /api/auth/username-requirements` - Requisiti username
 
 ### Users
 - `POST /api/users` - Crea nuovo utente
@@ -162,14 +197,16 @@ public/
 
 ## 🔮 Future Features
 
-- Integrazione con database PostgreSQL + PostGIS
-- Autenticazione JWT
+- ✅ **Integrazione con database PostgreSQL + PostGIS** (opzioni disponibili, setup wizard implementato)
+- ✅ **Autenticazione con JWT** (implementato nei servizi)
 - WebSocket per aggiornamenti real-time
 - App mobile nativa (React Native)
 - Sistema di team e clan
 - Eventi e sfide globali
 - Integrazione con smartwatch e fitness tracker
 - Modalità offline con sincronizzazione
+- Notifiche push per nuove sfide
+- Sistema di messaggistica tra giocatori
 
 ---
 
