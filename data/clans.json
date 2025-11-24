@@ -1,0 +1,33 @@
+{
+  "4565f5cf-c70b-4056-aceb-b4a164c9d540": {
+    "id": "4565f5cf-c70b-4056-aceb-b4a164c9d540",
+    "name": "Demo Warriors",
+    "description": "Il clan dei conquistatori demo",
+    "founderId": "8dd9744a-da74-45b4-8635-96da320aba6b",
+    "members": [
+      "8dd9744a-da74-45b4-8635-96da320aba6b",
+      "c8136bc1-b4b6-4f58-8c51-4bd37efac839"
+    ],
+    "level": 1,
+    "experience": 0,
+    "totalArea": 0,
+    "totalDistance": 0,
+    "createdAt": "2025-11-22T19:02:15.234Z",
+    "updatedAt": "2025-11-22T19:02:15.240Z"
+  },
+  "345d98e7-bb8e-441a-bfd3-bf04d9f96c4f": {
+    "id": "345d98e7-bb8e-441a-bfd3-bf04d9f96c4f",
+    "name": "Elite Warriors",
+    "description": "Il miglior clan",
+    "founderId": "test-user-123",
+    "members": [
+      "test-user-123"
+    ],
+    "level": 1,
+    "experience": 0,
+    "totalArea": 0,
+    "totalDistance": 0,
+    "createdAt": "2025-11-22T21:23:33.251Z",
+    "updatedAt": "2025-11-22T21:23:33.251Z"
+  }
+}

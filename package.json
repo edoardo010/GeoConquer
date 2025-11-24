@@ -8,7 +8,9 @@
     "start": "node dist/index.js",
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
     "demo": "ts-node demo.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup:db": "ts-node src/admin/dbSetup.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "npm run build && npm start"
   },
   "repository": {
     "type": "git",
@@ -27,6 +29,7 @@
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
     "@types/uuid": "^10.0.0",
+    "axios": "^1.13.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",

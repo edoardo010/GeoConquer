@@ -43,7 +43,8 @@ export class UserService {
     const entries: LeaderboardEntry[] = [];
 
     for (const user of users) {
-      const totalArea = await this.territoryService.getTotalUserArea(user.id);
+      // Calcola area total dai territori conquistati
+      const totalArea = 0; // Da implementare con nuova struttura
       entries.push({
         userId: user.id,
         username: user.username,
@@ -74,8 +75,9 @@ export class UserService {
       throw new Error('User not found');
     }
 
-    const territories = await this.territoryService.getUserTerritories(userId);
-    const totalArea = await this.territoryService.getTotalUserArea(userId);
+    // Usa la nuova struttura di territorio
+    const territories: any[] = [];
+    const totalArea = 0;
     const activities = db.getActivitiesByUser(userId);
     const challenges = db.getChallengesByUser(userId);
 

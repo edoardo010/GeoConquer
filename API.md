@@ -4,6 +4,118 @@ API per il sistema di conquista territoriale e sfide di GeoConquer.
 
 ## Endpoints
 
+### Autenticazione
+
+#### Register User
+```
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "username": "mario_rossi",
+  "email": "mario@example.com",
+  "password": "Password123!",
+  "confirmPassword": "Password123!"
+}
+```
+
+Response (201):
+```json
+{
+  "message": "User registered successfully",
+  "user": {
+    "id": "uuid-here",
+    "username": "mario_rossi",
+    "email": "mario@example.com",
+    "level": 1,
+    "createdAt": "2024-11-22T10:00:00.000Z"
+  },
+  "token": "jwt-token-here"
+}
+```
+
+#### Login User
+```
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "mario_rossi",
+  "password": "Password123!"
+}
+```
+
+Response (200):
+```json
+{
+  "message": "Login successful",
+  "user": {
+    "id": "uuid-here",
+    "username": "mario_rossi",
+    "email": "mario@example.com",
+    "level": 1
+  },
+  "token": "jwt-token-here"
+}
+```
+
+#### Logout User
+```
+POST /api/auth/logout
+Authorization: Bearer jwt-token-here
+```
+
+#### Verify Token
+```
+GET /api/auth/verify
+Authorization: Bearer jwt-token-here
+```
+
+Response (200):
+```json
+{
+  "valid": true,
+  "userId": "user-uuid",
+  "message": "Token is valid"
+}
+```
+
+#### Get Password Requirements
+```
+GET /api/auth/password-requirements
+```
+
+Response (200):
+```json
+{
+  "password_requirements": [
+    "Minimum 8 characters",
+    "At least one uppercase letter (A-Z)",
+    "At least one lowercase letter (a-z)",
+    "At least one number (0-9)",
+    "At least one special character (!@#$%^&*)"
+  ]
+}
+```
+
+#### Get Username Requirements
+```
+GET /api/auth/username-requirements
+```
+
+Response (200):
+```json
+{
+  "username_requirements": [
+    "Minimum 3 characters",
+    "Maximum 20 characters",
+    "Can only contain letters, numbers, underscores, and hyphens"
+  ]
+}
+```
+
+---
+
 ### Users
 
 #### Create User
