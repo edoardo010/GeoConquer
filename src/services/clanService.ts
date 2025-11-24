@@ -55,6 +55,7 @@ export class ClanService {
       {
         userId: founderId,
         clanId,
+        username: 'founder',
         role: 'founder',
         joinedAt: new Date(),
         contribution: 0
@@ -101,6 +102,7 @@ export class ClanService {
     members.push({
       userId,
       clanId,
+      username: 'member',
       role: 'member',
       joinedAt: new Date(),
       contribution: 0
@@ -199,6 +201,46 @@ export class ClanService {
         contribution: m.contribution,
         role: m.role
       }));
+  }
+
+  async getUserClan(userId: string): Promise<Clan | undefined> {
+    for (const clan of this.clans.values()) {
+      if (clan.members.includes(userId)) {
+        return clan;
+      }
+    }
+    return undefined;
+  }
+
+  async promoteMember(clanId: string, userId: string): Promise<ClanMember | undefined> {
+    const members = this.clanMembers.get(clanId) || [];
+    const member = members.find(m => m.userId === userId);
+    
+    if (member && member.role === 'member') {
+      member.role = 'officer';
+      this.saveToDisk();
+      return member;
+    }
+    
+    return undefined;
+  }
+
+  async removeMemberFromClan(clanId: string, userId: string): Promise<void> {
+    const clan = this.clans.get(clanId);
+    if (clan) {
+      clan.members = clan.members.filter(m => m !== userId);
+      const members = this.clanMembers.get(clanId) || [];
+      this.clanMembers.set(
+        clanId,
+        members.filter(m => m.userId !== userId)
+      );
+      this.saveToDisk();
+    }
+  }
+
+  async saveClan(clan: Clan): Promise<void> {
+    this.clans.set(clan.id, clan);
+    this.saveToDisk();
   }
 
   getGlobalLeaderboard(limit: number = 100): Array<{

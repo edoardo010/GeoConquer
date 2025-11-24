@@ -17,9 +17,11 @@ export interface Clan {
 export interface ClanMember {
   userId: string;
   clanId: string;
-  role: 'founder' | 'admin' | 'member';
+  username: string;
+  role: 'founder' | 'officer' | 'member';
   joinedAt: Date;
   contribution: number;
+  lastActive?: Date;
 }
 
 export interface ClanStats {
