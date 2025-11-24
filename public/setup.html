@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GeoConquer - Configuration Wizard</title>
+    <title>GeoConquer - Configurazione Iniziale</title>
     <link rel="stylesheet" href="/styles.css" />
     <style>
         body {
@@ -11,359 +11,434 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 1rem;
         }
-        
-        .wizard-container {
-            width: 90%;
-            max-width: 500px;
-            background: var(--bg-darker);
-            border-radius: 15px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+
+        .setup-wizard {
+            width: 100%;
+            max-width: 600px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
         }
-        
-        .wizard-header {
+
+        .setup-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 2rem;
             text-align: center;
-            margin-bottom: 30px;
+            color: white;
         }
-        
-        .wizard-header h1 {
-            margin: 0 0 10px 0;
-            color: var(--text-primary);
-            font-size: 1.8em;
+
+        .setup-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
         }
-        
-        .wizard-header p {
+
+        .setup-header p {
             margin: 0;
-            color: var(--text-muted);
+            color: rgba(255, 255, 255, 0.8);
         }
-        
-        .wizard-step {
+
+        .setup-body {
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .setup-step {
             display: none;
+            animation: slideIn 0.3s ease;
         }
-        
-        .wizard-step.active {
+
+        .setup-step.active {
             display: block;
-            animation: fadeIn 0.3s ease-in;
         }
-        
-        @keyframes fadeIn {
+
+        .setup-step h2 {
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .progress-step {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active,
+        .progress-step.completed {
+            background: var(--primary);
+        }
+
+        .server-options {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .server-option {
+            position: relative;
+            padding: 1.5rem;
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-tertiary);
+        }
+
+        .server-option:hover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .server-option input[type="radio"] {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .server-option.selected {
+            border-color: var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .server-option-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .server-option-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .custom-input-group {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 0.75rem;
+            border: 1px solid var(--border);
+        }
+
+        .custom-input-group.show {
+            display: block;
+        }
+
+        .custom-input-group label {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-input-group input {
+            margin-bottom: 0;
+        }
+
+        .info-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--secondary);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .info-box h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: inherit;
+        }
+
+        .setup-footer {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .setup-footer button {
+            flex: 1;
+        }
+
+        .btn-prev {
+            flex-basis: auto;
+        }
+
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-        
-        .step-title {
-            color: var(--text-primary);
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            font-weight: 600;
-        }
-        
-        .step-description {
-            color: var(--text-muted);
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            font-size: 1em;
-            box-sizing: border-box;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .server-options {
-            display: grid;
-            gap: 10px;
-        }
-        
-        .server-option {
-            padding: 15px;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--bg-card);
-        }
-        
-        .server-option:hover {
-            border-color: #667eea;
-            background: rgba(102, 126, 234, 0.05);
-        }
-        
-        .server-option.selected {
-            border-color: #10b981;
-            background: rgba(16, 185, 129, 0.1);
-        }
-        
-        .server-option-title {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 5px;
-        }
-        
-        .server-option-desc {
-            font-size: 0.85em;
-            color: var(--text-muted);
-        }
-        
-        .wizard-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 30px;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-        
-        .btn-secondary {
-            background: var(--bg-darker);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-card);
-        }
-        
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .wizard-progress {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-        
-        .progress-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--border-color);
-            transition: all 0.3s ease;
-        }
-        
-        .progress-dot.active {
-            background: #667eea;
-            transform: scale(1.3);
-        }
-        
+
         .success-message {
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid #10b981;
-            color: #10b981;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
             text-align: center;
+            padding: 2rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-message h2 {
+            margin-top: 0;
+            color: var(--secondary);
+        }
+
+        .success-message p {
+            color: var(--text-secondary);
         }
     </style>
 </head>
 <body>
-    <div class="wizard-container">
-        <div class="wizard-header">
+    <div class="setup-wizard">
+        <!-- Header -->
+        <div class="setup-header">
             <h1>🌍 GeoConquer</h1>
-            <p>Configuration Wizard</p>
+            <p>Configurazione Iniziale</p>
         </div>
 
-        <div class="wizard-progress">
-            <div class="progress-dot active" id="progress-0"></div>
-            <div class="progress-dot" id="progress-1"></div>
-            <div class="progress-dot" id="progress-2"></div>
-        </div>
+        <!-- Body -->
+        <div class="setup-body">
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-step active" id="progress-0"></div>
+                <div class="progress-step" id="progress-1"></div>
+                <div class="progress-step" id="progress-2"></div>
+                <div class="progress-step" id="progress-3"></div>
+            </div>
 
-        <!-- Step 1: Benvenuto -->
-        <div class="wizard-step active" id="step-0">
-            <div class="step-title">👋 Benvenuto</div>
-            <div class="step-description">
-                Ciao! Questo wizard ti guiderà nella configurazione di GeoConquer. Seguici attraverso i prossimi passaggi per impostare il tuo server e il database.
+            <!-- Step 1: Benvenuto -->
+            <div class="setup-step active" id="step-0">
+                <h2>👋 Benvenuto a GeoConquer</h2>
+                <p>Ciao! Questo wizard ti guiderà nella configurazione iniziale dell'applicazione.</p>
+                <div style="text-align: center; font-size: 3rem; margin: 2rem 0;">🗺️</div>
+                <p>Trasforma il tuo movimento quotidiano in un'avventura di conquista. Segui i prossimi passaggi per iniziare!</p>
             </div>
-            <div style="text-align: center; margin: 30px 0;">
-                <div style="font-size: 3em;">🗺️</div>
-            </div>
-        </div>
 
-        <!-- Step 2: Selezione Server -->
-        <div class="wizard-step" id="step-1">
-            <div class="step-title">🖥️ Seleziona Server</div>
-            <div class="step-description">
-                Dove desideri eseguire GeoConquer?
-            </div>
-            <div class="server-options">
-                <div class="server-option" onclick="selectServer('local')">
-                    <div class="server-option-title">💻 Locale (Localhost)</div>
-                    <div class="server-option-desc">Esegui su questo PC (localhost:3000)</div>
+            <!-- Step 2: Credenziali Admin -->
+            <div class="setup-step" id="step-1">
+                <h2>🔐 Credenziali Admin</h2>
+                <div class="info-box">
+                    <h4>ℹ️ Informazione Importante</h4>
+                    <p>Queste credenziali verranno utilizzate per accedere al pannello amministrativo. Conservale in un luogo sicuro.</p>
                 </div>
-                <div class="server-option" onclick="selectServer('custom')">
-                    <div class="server-option-title">🌐 Personalizzato</div>
-                    <div class="server-option-desc">Usa un URL server personalizzato</div>
+                <div class="form-group">
+                    <label for="admin-email">📧 Email Admin</label>
+                    <input type="email" id="admin-email" placeholder="admin@geoconquer.it" required>
                 </div>
-                <div class="server-option" onclick="selectServer('cloud')">
-                    <div class="server-option-title">☁️ Cloud (Futuro)</div>
-                    <div class="server-option-desc">Deploy su server cloud (prossimamente)</div>
+                <div class="form-group">
+                    <label for="admin-username">👤 Username Admin</label>
+                    <input type="text" id="admin-username" placeholder="administrator" required>
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">🔒 Password Admin</label>
+                    <input type="password" id="admin-password" placeholder="Password sicura..." required>
                 </div>
             </div>
-            <div class="form-group" id="customServerGroup" style="display: none; margin-top: 20px;">
-                <label for="customServerUrl">URL Server</label>
-                <input type="url" id="customServerUrl" placeholder="http://example.com:3000" />
-            </div>
-        </div>
 
-        <!-- Step 3: Database -->
-        <div class="wizard-step" id="step-2">
-            <div class="step-title">💾 Configurazione Database</div>
-            <div class="step-description">
-                GeoConquer utilizza file JSON locali per il database. I dati verranno salvati nella cartella <code>/data</code> del progetto.
-            </div>
-            <div style="background: var(--bg-card); padding: 20px; border-radius: 8px; border-left: 3px solid #667eea; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; color: var(--text-primary); font-weight: 600;">✅ Tipo Database</p>
-                <p style="margin: 0; color: var(--text-muted);">File-Based JSON (Locale)</p>
-            </div>
-            <div style="background: var(--bg-card); padding: 20px; border-radius: 8px; border-left: 3px solid #10b981; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; color: var(--text-primary); font-weight: 600;">✅ Posizione Dati</p>
-                <p style="margin: 0; color: var(--text-muted); font-family: monospace; font-size: 0.85em;">/data</p>
-            </div>
-            <div style="background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border: 1px solid #10b981; color: #10b981; text-align: center;">
-                <p style="margin: 0;">✅ Tutto pronto! Nessuna configurazione DB necessaria.</p>
-            </div>
-        </div>
+            <!-- Step 3: Selezione Server -->
+            <div class="setup-step" id="step-2">
+                <h2>🖥️ Seleziona Server</h2>
+                <p>Dove desideri eseguire GeoConquer?</p>
+                <div class="server-options">
+                    <!-- Locale -->
+                    <label class="server-option" onclick="selectServer(this, 'local')">
+                        <input type="radio" name="server" value="local" style="display: none;">
+                        <div class="server-option-title">💻 Locale</div>
+                        <div class="server-option-desc">Esegui su questo PC (localhost:3000)</div>
+                    </label>
 
-        <div class="wizard-buttons">
-            <button class="btn btn-secondary" onclick="previousStep()" id="btn-prev" style="display: none;">← Indietro</button>
-            <button class="btn btn-primary" onclick="nextStep()" id="btn-next">Avanti →</button>
-            <button class="btn btn-primary" onclick="completeSetup()" id="btn-complete" style="display: none;">✅ Completa Setup</button>
+                    <!-- Custom -->
+                    <label class="server-option" onclick="selectServer(this, 'custom')">
+                        <input type="radio" name="server" value="custom" style="display: none;">
+                        <div class="server-option-title">🌐 Personalizzato</div>
+                        <div class="server-option-desc">Usa un URL server personalizzato</div>
+                    </label>
+
+                    <!-- Cloud -->
+                    <label class="server-option" onclick="selectServer(this, 'cloud')">
+                        <input type="radio" name="server" value="cloud" style="display: none;">
+                        <div class="server-option-title">☁️ Cloud (Futuro)</div>
+                        <div class="server-option-desc">Deploy su server cloud (prossimamente)</div>
+                    </label>
+                </div>
+
+                <!-- Custom Input -->
+                <div class="custom-input-group" id="custom-input">
+                    <label for="custom-url">URL Server</label>
+                    <input type="url" id="custom-url" placeholder="http://example.com:3000">
+                </div>
+            </div>
+
+            <!-- Step 4: Database -->
+            <div class="setup-step" id="step-3">
+                <h2>💾 Database</h2>
+                <div class="info-box">
+                    <h4>✅ Configurazione Automatica</h4>
+                    <p>GeoConquer utilizza file JSON locali. Nessuna setup necessaria!</p>
+                </div>
+                <div style="background: var(--bg-tertiary); padding: 1.5rem; border-radius: 0.75rem; margin-bottom: 1rem;">
+                    <div style="margin-bottom: 1rem;">
+                        <p style="color: var(--text-muted); margin: 0 0 0.5rem 0;">📊 Tipo Database</p>
+                        <p style="color: var(--text-primary); font-weight: 600; font-size: 1.1rem; margin: 0;">File-Based JSON (Locale)</p>
+                    </div>
+                    <div style="margin-bottom: 1rem;">
+                        <p style="color: var(--text-muted); margin: 0 0 0.5rem 0;">📁 Percorso Dati</p>
+                        <p style="color: var(--text-primary); font-weight: 600; font-family: monospace; margin: 0;">/data</p>
+                    </div>
+                    <div>
+                        <p style="color: var(--text-muted); margin: 0 0 0.5rem 0;">⚡ Status</p>
+                        <p style="color: var(--secondary); font-weight: 600; margin: 0;">✅ Pronto per l'uso</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Successo -->
+            <div class="setup-step" id="step-4">
+                <div class="success-message">
+                    <div class="success-icon">✅</div>
+                    <h2>Setup Completato!</h2>
+                    <p>La configurazione iniziale è terminata con successo.</p>
+                    <p style="margin-top: 1rem; color: var(--text-muted);">
+                        Ora puoi accedere a GeoConquer e iniziare la tua avventura di conquista!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="setup-footer" id="setup-footer">
+                <button class="btn btn-secondary btn-prev" onclick="prevStep()" id="btn-prev" style="display: none;">← Indietro</button>
+                <button class="btn btn-primary" onclick="nextStep()" id="btn-next">Avanti →</button>
+            </div>
         </div>
     </div>
 
     <script>
         let currentStep = 0;
         let selectedServer = null;
+        const totalSteps = 5;
 
         function goToStep(step) {
             // Nascondi tutti gli step
-            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.progress-dot').forEach(d => d.classList.remove('active'));
+            document.querySelectorAll('.setup-step').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.progress-step').forEach((p, idx) => {
+                p.classList.remove('active');
+                if (idx < step) p.classList.add('completed');
+                if (idx === step) p.classList.add('active');
+            });
 
             // Mostra step corrente
             document.getElementById(`step-${step}`).classList.add('active');
-            document.getElementById(`progress-${step}`).classList.add('active');
-
+            
             // Aggiorna bottoni
-            document.getElementById('btn-prev').style.display = step === 0 ? 'none' : 'block';
-            document.getElementById('btn-next').style.display = step === 2 ? 'none' : 'block';
-            document.getElementById('btn-complete').style.display = step === 2 ? 'block' : 'none';
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+            
+            prevBtn.style.display = step === 0 ? 'none' : 'block';
+            nextBtn.textContent = step === totalSteps - 1 ? '✅ Completa' : 'Avanti →';
+            nextBtn.onclick = step === totalSteps - 1 ? completeSetup : nextStep;
 
             currentStep = step;
         }
 
         function nextStep() {
-            if (currentStep === 1 && !selectedServer) {
-                alert('⚠️ Seleziona un tipo di server per continuare');
-                return;
+            if (currentStep === 1) {
+                const email = document.getElementById('admin-email').value;
+                const username = document.getElementById('admin-username').value;
+                const password = document.getElementById('admin-password').value;
+
+                if (!email || !username || !password) {
+                    alert('⚠️ Compila tutti i campi');
+                    return;
+                }
+
+                localStorage.setItem('adminEmail', email);
+                localStorage.setItem('adminUsername', username);
+                localStorage.setItem('adminPassword', password);
             }
-            if (currentStep < 2) {
+
+            if (currentStep === 2) {
+                if (!selectedServer) {
+                    alert('⚠️ Seleziona un tipo di server');
+                    return;
+                }
+
+                let serverUrl = 'http://localhost:3000';
+
+                if (selectedServer === 'custom') {
+                    const customUrl = document.getElementById('custom-url').value;
+                    if (!customUrl) {
+                        alert('⚠️ Inserisci un URL server valido');
+                        return;
+                    }
+                    serverUrl = customUrl;
+                } else if (selectedServer === 'cloud') {
+                    alert('☁️ Cloud deployment non è ancora disponibile');
+                    return;
+                }
+
+                localStorage.setItem('serverUrl', serverUrl);
+            }
+
+            if (currentStep < totalSteps - 1) {
                 goToStep(currentStep + 1);
             }
         }
 
-        function previousStep() {
+        function prevStep() {
             if (currentStep > 0) {
                 goToStep(currentStep - 1);
             }
         }
 
-        function selectServer(type) {
-            selectedServer = type;
-
-            // Aggiorna UI
+        function selectServer(element, type) {
+            // Rimuovi selezione precedente
             document.querySelectorAll('.server-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
-            event.target.closest('.server-option').classList.add('selected');
 
-            // Mostra form personalizzato se necessario
-            const customGroup = document.getElementById('customServerGroup');
+            // Aggiungi selezione al click
+            element.classList.add('selected');
+            selectedServer = type;
+
+            // Mostra/nascondi custom input
+            const customInput = document.getElementById('custom-input');
             if (type === 'custom') {
-                customGroup.style.display = 'block';
+                customInput.classList.add('show');
             } else {
-                customGroup.style.display = 'none';
+                customInput.classList.remove('show');
             }
         }
 
         function completeSetup() {
-            let serverUrl = 'http://localhost:3000';
-
-            if (selectedServer === 'custom') {
-                const customUrl = document.getElementById('customServerUrl').value;
-                if (!customUrl) {
-                    alert('⚠️ Inserisci un URL server valido');
-                    return;
-                }
-                serverUrl = customUrl;
-            } else if (selectedServer === 'cloud') {
-                alert('☁️ Cloud deployment non è ancora disponibile');
-                return;
-            }
-
-            // Salva configurazione
-            localStorage.setItem('serverUrl', serverUrl);
             localStorage.setItem('setupCompleted', 'true');
-
-            // Mostra messaggio successo
-            alert(`✅ Setup completato!\n\nServer: ${serverUrl}`);
-
-            // Reindirizza a home
+            alert('✅ Setup completato!\n\nAccedendo a GeoConquer...');
             window.location.href = '/index.html';
         }
 
